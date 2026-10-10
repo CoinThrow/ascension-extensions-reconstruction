@@ -497,7 +497,7 @@ namespace
         sDC.AddPacketHandler(0x904, CNetClientCustomPacket((void*)&On904, nullptr));
         sDC.AddPacketHandler(0x9B1, CNetClientCustomPacket((void*)&On9B1, nullptr));
         sDC.AddPacketHandler(0x9B2, CNetClientCustomPacket((void*)&On9B2, nullptr));
-        AscRuntime::OnAfter403340(&WatchLevel);
+        AscRuntime::OnAfter403340(&WatchLevel, 7);   // measured rank 7
     }
     AscBindings::Module s_module(nullptr, 0, &Init);
 }

@@ -180,8 +180,8 @@ namespace
         sDC.AddPacketHandler(0x9C3, CNetClientCustomPacket((void*)&OnRemove, nullptr));
         sDC.AddPacketHandler(0x9C4, CNetClientCustomPacket((void*)&OnList, nullptr));
         sDC.AddPacketHandler(0x9C5, CNetClientCustomPacket((void*)&OnUpdate, nullptr));
-        AscRuntime::OnEnterWorld(OnEnterWorld);
-        AscRuntime::OnAfter403340(Tick);
+        AscRuntime::OnEnterWorld(OnEnterWorld, 0);   // measured rank 0
+        AscRuntime::OnAfter403340(Tick, 5);          // measured rank 5
     }
 
     const AscBindings::Binding kBindings[] = {   // registrar 0x10320B00

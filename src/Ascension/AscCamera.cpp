@@ -273,7 +273,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnAfterTargetChange(&AfterTargetChange);
+        AscRuntime::OnAfterTargetChange(&AfterTargetChange, 0);   // measured rank 0
         AscRuntime::OnBefore6ECF80(&Before6ECF80);
         g_601D60 = reinterpret_cast<Fn601D60_t>(AscRuntime::Detour(0x601D60, 6, reinterpret_cast<void*>(&Detour601D60)));
         g_605D60 = reinterpret_cast<Fn605D60_t>(AscRuntime::Detour(0x605D60, 6, reinterpret_cast<void*>(&Detour605D60)));

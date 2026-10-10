@@ -720,7 +720,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnEnterWorld(&ResetOnEnterWorld);
+        AscRuntime::OnEnterWorld(&ResetOnEnterWorld, 10);   // measured rank 10
         AscCA::OnSpecChanged(OnSpecChanged);
         sDC.AddPacketHandler(0x6F0, CNetClientCustomPacket((void*)&OnQuickRollConfigs, nullptr));
         AscRuntime::OnGlueScreen(OnGlueScreen);

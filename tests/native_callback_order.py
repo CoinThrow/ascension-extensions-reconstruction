@@ -40,6 +40,16 @@ std::vector<std::pair<uint32_t, VisualHide>>& VisualHideList()
 @APPLY_REGISTER@
 @EFFECT_REGISTER@
 @VISUAL_REGISTER@
+using Callback = void (*)();
+using ObjectCallback = void (*)(void*);
+std::vector<std::pair<uint32_t, Callback>>& EnterWorldList()
+{ static std::vector<std::pair<uint32_t, Callback>> v; return v; }
+std::vector<std::pair<uint32_t, ObjectCallback>>& ObjectFreeList()
+{ static std::vector<std::pair<uint32_t, ObjectCallback>> v; return v; }
+@RANKED_INSERT@
+@RANKED_RUN@
+@ENTER_REGISTER@
+@OBJECTFREE_REGISTER@
 std::vector<int> trace;
 int veto = -1;
 bool clientCast = true;
@@ -70,6 +80,9 @@ template<int N> bool Hide(uint32_t kind, uint32_t guidLo, uint32_t guidHi, uint3
     trace.push_back(N);
     return N == 1;
 }
+template<int N> void EnterCb() { trace.push_back(N); }
+void EnterUnknown() { trace.push_back(7); }
+template<int N> void FreeCb(void*) { trace.push_back(N + 20); }
 int OriginalRemove(void*, void*, uint32_t, uint32_t) { trace.push_back(9); return 7; }
 int OriginalApply(void*, void*, uint32_t, uint32_t) { trace.push_back(9); return 7; }
 int OriginalCast(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)
@@ -171,8 +184,47 @@ int main()
         OnVisualHide(visualHide[1], visualSites[1]);
         Check(VisualHideList().size() == 2);
     } while (std::next_permutation(filterOrder.begin(), filterOrder.end()));
+    {
+        const uint32_t enterRanks[] = {@ENTER_RANKS@};
+        Callback enter[] = {&EnterCb<0>, &EnterCb<1>, &EnterCb<2>, &EnterCb<3>, &EnterCb<4>};
+        std::vector<int> captured;
+        for (int i = 0; i < 5; ++i) captured.push_back(i);
+        std::sort(captured.begin(), captured.end(),
+                  [&enterRanks](int a, int b) { return enterRanks[a] < enterRanks[b]; });
+        std::array<int, 5> enterOrder{0, 1, 2, 3, 4};
+        do
+        {
+            EnterWorldList().clear();
+            for (int i : enterOrder) OnEnterWorld(enter[i], enterRanks[i]);
+            std::vector<int> got;
+            for (auto& e : EnterWorldList())
+                for (int i = 0; i < 5; ++i)
+                    if (e.second == enter[i]) got.push_back(i);
+            Check(got == captured);
+            OnEnterWorld(&EnterUnknown, 0xFFFFFFFFu);
+            Check(EnterWorldList().size() == 6
+                  && EnterWorldList().back().second == &EnterUnknown);
+            OnEnterWorld(enter[0], enterRanks[0]);
+            Check(EnterWorldList().size() == 6);
+            trace.clear();
+            RunRanked(EnterWorldList());
+            std::vector<int> ran = captured;
+            ran.push_back(7);
+            Check(trace == ran);
+        } while (std::next_permutation(enterOrder.begin(), enterOrder.end()));
+        ObjectCallback freeCallbacks[] = {&FreeCb<0>, &FreeCb<1>};
+        const uint32_t freeRanks[] = {@FREE_RANKS@};
+        ObjectFreeList().clear();
+        OnObjectFree(freeCallbacks[1], freeRanks[1]);
+        OnObjectFree(freeCallbacks[0], freeRanks[0]);
+        Check(ObjectFreeList().size() == 2
+              && ObjectFreeList()[0].second == &FreeCb<0>
+              && ObjectFreeList()[1].second == &FreeCb<1>);
+        OnObjectFree(&FreeCb<1>, freeRanks[1]);
+        Check(ObjectFreeList().size() == 2);
+    }
     std::cout << checks << " checks, " << failures << " failures: original callback order, vetoes, "
-              << "client fall-through, duplicate and unknown registration\n";
+              << "client fall-through, duplicate and unknown registration, measured-rank lists\n";
     return failures ? 1 : 0;
 }
 '''
@@ -194,7 +246,10 @@ def check_relocation_buckets(fixture):
 
 
 def check_captured_lists(fixture):
-    for name in ('Before71E930', 'After80B5D0', 'Before724820', 'EffectFilter', 'VisualHide'):
+    for name in ('Before71E930', 'After80B5D0', 'Before724820', 'EffectFilter', 'VisualHide',
+                 'EnterWorld', 'AfterEnterWorld', 'After403340', 'Alternate6DF050', 'LeaveWorld',
+                 'Before528F00', 'After402910', 'After495810', 'After4F6F90', 'ObjectFree',
+                 'AfterTargetChange'):
         sites = [e['site'] for e in fixture[name]['callbacks'] if e.get('site')]
         functions = [e['function'] for e in fixture[name]['callbacks'] if e.get('function')]
         assert len(sites) == len(set(sites)) and len(functions) == len(set(functions)), name
@@ -221,6 +276,10 @@ def main():
         ('APPLY_REGISTER', 'void OnBefore724820('),
         ('EFFECT_REGISTER', 'void OnEffectFilter('),
         ('VISUAL_REGISTER', 'void OnVisualHide('),
+        ('RANKED_INSERT', '    template <class T>\n    void InsertRanked('),
+        ('RANKED_RUN', '    template <class T>\n    void RunRanked('),
+        ('ENTER_REGISTER', 'void OnEnterWorld(Callback'),
+        ('OBJECTFREE_REGISTER', 'void OnObjectFree(ObjectCallback'),
         ('REMOVE_DETOUR', 'int __fastcall Detour71E930('),
         ('CAST_DETOUR', 'int __cdecl Detour80B5D0('),
         ('APPLY_DETOUR', 'int __fastcall Detour724820('),
@@ -232,6 +291,14 @@ def main():
                          ('VISUAL_SITES', 'VisualHide')]:
         sites = [e['site'] for e in fixture[name]['callbacks'] if e.get('site')]
         harness = harness.replace(f'@{marker}@', ', '.join(sites))
+    enter_slots = ('AscWorldEntryTweaks::Send561', 'AscSpellCharges::OnEnterWorld',
+                   'AscBugTracker::Clear', 'AscGraphics::CullingOn', 'AscProfiler::Arm')
+    enter_ranks = [str(next(e for e in fixture['EnterWorld']['callbacks'] if e['name'] == s)['rank'])
+                   for s in enter_slots]
+    harness = harness.replace('@ENTER_RANKS@', ', '.join(enter_ranks))
+    free_ranks = [str(next(e for e in fixture['ObjectFree']['callbacks'] if e['name'] == s)['rank'])
+                  for s in ('AscAuraAmounts::ForgetObject', 'AscObjectAddon::OnObjectFree')]
+    harness = harness.replace('@FREE_RANKS@', ', '.join(free_ranks))
     compiler = shutil.which(os.environ.get('CXX', 'cl.exe' if os.name == 'nt' else 'c++'))
     if not compiler:
         raise SystemExit('A C++20 compiler is required.')

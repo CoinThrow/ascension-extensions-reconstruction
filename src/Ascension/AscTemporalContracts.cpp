@@ -653,7 +653,7 @@ namespace
     void Init()   // FUN_10339120
     {
         AscRuntime::OnGlueScreen(OnGlue);
-        AscRuntime::OnEnterWorld(OnEnterWorld);
+        AscRuntime::OnEnterWorld(OnEnterWorld, 6);   // measured rank 6
     }
 
     const AscBindings::Binding kBindings[] = {

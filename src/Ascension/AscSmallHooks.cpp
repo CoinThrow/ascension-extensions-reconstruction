@@ -206,7 +206,7 @@ namespace
         AscRuntime::ReplaceFunction(0x805F60, reinterpret_cast<void*>(&Replace805F60));
         g_5ADA20 = reinterpret_cast<Fn5ADA20_t>(AscRuntime::Detour(0x5ADA20, 9, reinterpret_cast<void*>(&Hook5ADA20)));
         AscClientOptions::QueueWorldCVar({"bankEquipmentManager", "0", 1, 4, reinterpret_cast<void*>(&BankManagerChanged)});
-        AscRuntime::OnEnterWorld(&BankManagerEnterWorld);
+        AscRuntime::OnEnterWorld(&BankManagerEnterWorld, 16);   // measured rank 16
         g_6B2F60 = reinterpret_cast<Fn6B2F60_t>(AscRuntime::Detour(0x6B2F60, 9, reinterpret_cast<void*>(&Hook6B2F60)));
     }
 

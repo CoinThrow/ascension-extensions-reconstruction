@@ -563,7 +563,7 @@ namespace
         AscClientOptions::QueueWorldCVar(visited);
         sDC.AddPacketHandler(0x740, CNetClientCustomPacket((void*)&OnSetPosition, nullptr));
         AscBindings::OnWorldRegistered(OnWorldLuaInit);
-        AscRuntime::OnEnterWorld(OnEnterWorld);
+        AscRuntime::OnEnterWorld(OnEnterWorld, 14);   // measured rank 14
         AscBindings::OnGlueRegistered(StopTimers);
     }
 

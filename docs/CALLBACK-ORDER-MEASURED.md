@@ -79,3 +79,49 @@ flag is `0x8000` (developer), and the tag pairs additionally never apply to your
 - `tests/native_callback_order.py` locks the orders in: the registrars run under all registration
   permutations, with vetoes, duplicate registrations, an off-array ("unknown") site, and — for visual
   hiding — the production consumer's first-true-wins short-circuit.
+
+## The remaining lifecycle lists (measured 2026-10-11)
+
+The eleven lifecycle lists with more than one registrant were measured the same way, after decoding
+what the lists *are*:
+
+- Every `On*` list is one **MSVC `std::unordered_set` of function pointers** (`sub_100997C0` of the
+  original is the set's insert; nodes are `{next, prev, value}` with the callback at `+8`; iteration
+  follows the set's linked list). Insertion **dedupes by pointer** — a repeated registration is a
+  no-op — and new nodes are inserted at the front of their bucket run, so the list order is the set's
+  **hash-bucket order of the runtime pointer values** (FNV-1a over the four relocated bytes, bucket
+  count by element count). It equals registration order only while buckets are collision-free, and it
+  **changes with the DLL load base**, because the hashed values are relocated addresses.
+- Observed bases: `0x67E30000` (donor_charselect2, donor_v3 — the reference sessions the five lists
+  above were pinned from), `0x66950000` (donor_full1), `0x63E40000` (donor_full2). The earlier note
+  that hash-bucket relationships "remain identical at every allocation-aligned image base" did not
+  hold — e.g. the six entries of `0x10BE5B68` walk in a different order at `0x66950000`. The pinned
+  ranks below are the reference-base `0x67E30000` walk; they reproduce the original as observed in
+  the campaign's session dumps.
+- The walks needed a full-private memory dump (`re\donor_dump4.py`): the earlier curated dumps missed
+  the secondary heap arena `0x26xxxxxx`, silently truncating GlueScreen, LeaveWorld, EnterWorld,
+  After403340, After6E7F50 and the lua-setup lists. The pinned orders use complete, closed rings.
+- Stock events (`0x81AA00` per-event dispatch, AscTutorial 0x258/0x1C0) and the direct-dispatch pairs
+  GameObjectUse/ItemUse have a single registrant each — order is trivial. OnStockEvent's callbacks are
+  per-event-id, so no cross-callback order exists there either.
+
+| list | pinned order (measured walk at 0x67E30000) | notes |
+| --- | --- | --- |
+| EnterWorld | SpellCharges, WorldEntryTweaks::Send561, Graphics::CullingOn, Profiler::Arm, ExtraActionButton, Graphics::BuildOccluders, TemporalContracts, BugTracker, MysticEnchant, WildcardRolls, WildcardRapid, CAMgr::BuildIndex, SpellShadow, UnitSelect::LoadCones, SuperTrack, SpellActivationOverlay, SmallHooks (+1 original-only last) | 18 entries; ExtraActionButton / SpellShadow / SmallHooks pinned via their init pairings (see the fixture notes) |
+| AfterEnterWorld | WET::Send561, WET::StanceForms, WET::StanceJump, WET::SkipCheck809572, Challenge, PlayerPoll, WET::LoadAntiCheat, WET::StartKillSwitch, Tutorial::SeedWatches | TooltipInsertFix::Apply is not in the original's set (reconstruction superset) |
+| After403340 | Challenge, Profiler, SpellCharges, MysticEnchant, EventPackets, RealmData, Tutorial, NamePlates (+ 8 original-only) | pinned from donor_full1 (0x66950000): the reference-base walk was cut off by an unmapped heap block |
+| Alternate6DF050 | ObjectAddon::KeepActivePlayer, UnitSelect::Tick, Graphics::MapCap, RaidVideo::Tick (+1 runtime-registered) | |
+| LeaveWorld | NamePlates::ClearPlates, MovementForce::Reset, Profiler::Disarm (+1 aura-type-map clear) | |
+| Before528F00 | CacheFiles::Prune, MovementForce::Reset, Profiler::Disarm (+1 aura-type-map clear) | |
+| After402910 | CacheFiles::Save, MovementForce::Reset (+1 aura-type-map clear) | |
+| After495810 | CharacterCreate::WatchComponent, RealmData::Tick (+1 runtime-registered) | |
+| After4F6F90 | Graphics::DrawOcclusion, UnitSelect::Render (+the shared empty stub) | |
+| ObjectFree | AuraAmounts::ForgetObject, ObjectAddon::OnObjectFree (+1 runtime-registered first) | |
+| AfterTargetChange | Camera::AfterTargetChange, AddonTaint::AfterTargetChange | |
+
+Implementation: `AscRuntime::InsertRanked` keeps `{rank, callback}` pairs; each registrar takes
+`uint32_t rank = 0xFFFFFFFF` and modules pass their callback's pinned rank at the registration site.
+Callbacks without a measured rank sort after the ranked entries, keeping registration order; the
+set's dedupe-by-pointer behaviour is reproduced. `native_callback_order.py` covers every registration
+permutation for representative lists plus dedupe, unknown placement and execution order (3849 checks,
+0 failures).

@@ -11,6 +11,12 @@
 //              (world UI entry; the original sets the in-world flag 0xBD0792).
 //              FUN_10278760 -> list 0x10be286c, run from a cave over 0x4DA5F0's epilogue at 0x4DA9AC
 //              (glue screen initialised -- i.e. back at login / character select).
+//   Order      Every lifecycle list is an MSVC unordered_set of function pointers; its traversal order
+//              was walked live (2026-10-11, three full-memory sessions) and pinned in
+//              tests/fixtures/original_callback_order.json. Modules pass each callback's `rank` in that
+//              order; a callback without a measured rank (the default) follows the ranked ones. The
+//              order is the set's hash-bucket order of the pointer values, so it depends on the load
+//              base -- the pinned snapshot is the reference-base order the fixtures and tests use.
 #include <cstdint>
 struct lua_State;
 
@@ -46,9 +52,9 @@ namespace AscRuntime
     void Cancel(uint32_t handle, TimerFn fn, void* param);
 
     typedef void (*Callback)();
-    void OnEnterWorld(Callback cb);     // FUN_10278510
-    void OnGlueScreen(Callback cb);     // FUN_10278760
-    void OnAfterEnterWorld(Callback cb); // FUN_10278780 -> list 0x10be29ac, after 0x528010 returns
+    void OnEnterWorld(Callback cb, uint32_t rank = 0xFFFFFFFFu);     // FUN_10278510
+    void OnGlueScreen(Callback cb);     // FUN_10278760 (glue list: unmeasured)
+    void OnAfterEnterWorld(Callback cb, uint32_t rank = 0xFFFFFFFFu); // FUN_10278780 -> list 0x10be29ac, after 0x528010 returns
 
     // FUN_10278530: callbacks run when the client dispatches stock event `eventId` (detour on the
     // per-event dispatcher 0x81AA00(eventId, L, nargs), callbacks before the original).
@@ -58,12 +64,12 @@ namespace AscRuntime
 
     // FUN_102785c0 -> list 0x10be28ac, run by the detour 0x10275CA0 (hook object 0x10BCB52C) BEFORE
     // 0x528C30, the world UI teardown (it signals an event, then unloads the world subsystems).
-    void OnLeaveWorld(Callback cb);
+    void OnLeaveWorld(Callback cb, uint32_t rank = 0xFFFFFFFFu);
     // FUN_10278640 -> list 0x10be28cc, run by the detour 0x10275D40 (hook object 0x10BCB538) before
     // 0x528F00. FUN_10278370 -> list 0x10be2a8c, run by the detour 0x10277FB0 (hook object 0x10BCB550)
     // after 0x402910 returns.
-    void OnBefore528F00(Callback cb);
-    void OnAfter402910(Callback cb);
+    void OnBefore528F00(Callback cb, uint32_t rank = 0xFFFFFFFFu);
+    void OnAfter402910(Callback cb, uint32_t rank = 0xFFFFFFFFu);
     // FUN_10278740 -> list 0x10BE2DB8: run with the object after client 0x6E7F50 (__thiscall(object))
     // returns (the original's detour 0x10275E90, hook object 0x10BCB65C).
     void OnAfter6E7F50(void (*cb)(void* object));
@@ -80,21 +86,21 @@ namespace AscRuntime
     void OnAfter5204C0(void (*cb)(void* first));
     // FUN_10278700 -> list 0x10be2aac: run after 0x4F6F90 (__thiscall, no stack arguments; the world
     // scene render) returns (the original's detour 0x10276270, hook object 0x10BCB5A4).
-    void OnAfter4F6F90(Callback cb);
+    void OnAfter4F6F90(Callback cb, uint32_t rank = 0xFFFFFFFFu);
 
     // FUN_10278680: run after the client function 0x403340 (list 0x10be29cc; the original's detour
     // 0x10276680). Used for per-player refresh checks such as the tutorial level watch.
-    void OnAfter403340(Callback cb);
+    void OnAfter403340(Callback cb, uint32_t rank = 0xFFFFFFFFu);
 
     // FUN_102786a0 -> list 0x10be288c: run after the client function 0x495810 (a, b, c, float dt) returns
     // (the original's detour 0x102776F0, hook object 0x10BCB520).
-    void OnAfter495810(Callback cb);
+    void OnAfter495810(Callback cb, uint32_t rank = 0xFFFFFFFFu);
 
     // FUN_102787a0 -> list 0x10be2bec: run with the object before client 0x6FC0F0 removes it.
     typedef void (*ObjectCallback)(void* object);
-    void OnObjectFree(ObjectCallback cb);
+    void OnObjectFree(ObjectCallback cb, uint32_t rank = 0xFFFFFFFFu);
     // FUN_102785e0 -> list 0x10be28ec: run on every second call of the stock packet handler 0x6DF050.
-    void OnAlternate6DF050(Callback cb);
+    void OnAlternate6DF050(Callback cb, uint32_t rank = 0xFFFFFFFFu);
     // The original's hook-manager detours over a game object's use (0x70F680, detour 0x10A42DD0) and
     // an item's use (0x708C20, detour 0x10A42F30): the original runs first, then these, with the object.
     void OnGameObjectUse(ObjectCallback cb);
@@ -108,7 +114,7 @@ namespace AscRuntime
     // FUN_10278600 -> list 0x10BE29EC: after client 0x52A980, only when the byte 0xBD0790 was set before it
     // (the original's detour 0x10275C60).
     void OnAfter52A980(Callback cb);
-    void OnAfterTargetChange(Callback cb);
+    void OnAfterTargetChange(Callback cb, uint32_t rank = 0xFFFFFFFFu);
     // FUN_10278660 -> list 0x10BE2BAC: run with the object's +0x144 before client 0x6ECF80 (detour 0x102762B0).
     void OnBefore6ECF80(void (*cb)(uint32_t));
     // Veto lists over three spell/aura paths. Each callback returns false to stop: the rest are skipped
@@ -120,7 +126,7 @@ namespace AscRuntime
     //                   returns bool): the original first; only when it is true, callbacks (a..e).
     typedef bool (__cdecl* UnitSpellVeto)(void* unit, uint32_t a, uint32_t b);
     // `site` identifies the original registration call. The aura-removal and cast lists use the measured
-    // native unordered_set traversal. Other lists retain call-site ordering until fully measured.
+    // native unordered_set traversal; the lifecycle lists above take a measured `rank` instead.
     void OnBefore724820(UnitSpellVeto cb, uint32_t site);
     void OnBefore71E930(UnitSpellVeto cb, uint32_t site);
     // FUN_10278800 -> list 0x10BE2D78: (unit, spell effect object) -> true removes the effect (0x6F87C0).

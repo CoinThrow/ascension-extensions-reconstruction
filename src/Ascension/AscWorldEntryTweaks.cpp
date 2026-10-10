@@ -137,12 +137,12 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnAfterEnterWorld(&StanceJump);        // 0x10A65414
-        AscRuntime::OnAfterEnterWorld(&StanceForms);       // 0x10A66074
-        AscRuntime::OnAfterEnterWorld(&Send561);           // 0x10A6724F
-        AscRuntime::OnAfterEnterWorld(&SkipCheck809572);   // 0x10A6916A
-        AscRuntime::OnAfterEnterWorld(&LoadAntiCheat);     // FUN_10a3abc0
-        AscRuntime::OnAfterEnterWorld(&StartKillSwitch);   // FUN_10a4aa40
+        AscRuntime::OnAfterEnterWorld(&StanceJump, 2);        // measured rank 2 (list order [Send561, StanceForms, StanceJump, ...])
+        AscRuntime::OnAfterEnterWorld(&StanceForms, 1);       // measured rank 1
+        AscRuntime::OnAfterEnterWorld(&Send561, 0);           // measured rank 0
+        AscRuntime::OnAfterEnterWorld(&SkipCheck809572, 3);   // measured rank 3
+        AscRuntime::OnAfterEnterWorld(&LoadAntiCheat, 6);     // measured rank 6
+        AscRuntime::OnAfterEnterWorld(&StartKillSwitch, 7);   // measured rank 7
     }
 
     AscBindings::Module s_module(nullptr, 0, &Init);

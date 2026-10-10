@@ -163,7 +163,7 @@ namespace
 
     void Init()   // FUN_103216a0
     {
-        AscRuntime::OnEnterWorld(&LoadTextures);
+        AscRuntime::OnEnterWorld(&LoadTextures, 12);   // measured rank 12
         g_616800 = reinterpret_cast<Fn1_t>(AscRuntime::Detour(0x616800, 6, reinterpret_cast<void*>(&Hook616800)));
         g_7E4370 = reinterpret_cast<Fn7_t>(AscRuntime::Detour(0x7E4370, 9, reinterpret_cast<void*>(&Hook7E4370)));
         g_4F8A40 = reinterpret_cast<Fn1_t>(AscRuntime::Detour(0x4F8A40, 8, reinterpret_cast<void*>(&Hook4F8A40)));

@@ -19,16 +19,41 @@ namespace
 #include <Ascension/AscEvents.generated.inc>
     };
 
-    std::vector<Callback>& EnterWorldList() { static std::vector<Callback> v; return v; }
+    // Ranked lifecycle storage. The original keeps each of these lists in an MSVC unordered_set of
+    // function pointers; iteration follows the set's linked list, whose order was walked live and pinned
+    // in tests/fixtures/original_callback_order.json ("measured order", 2026-10-11, three full-memory
+    // sessions; the order is the set's hash-bucket order of the pointer values at the reference load
+    // base). Modules pass their callback's rank in the measured order; a callback without a measured
+    // rank (the default) follows the ranked ones and keeps registration order. The set also dedupes.
+    template <class T>
+    void InsertRanked(std::vector<std::pair<uint32_t, T>>& v, T cb, uint32_t rank)
+    {
+        for (auto& e : v)
+            if (e.second == cb)
+                return;                          // the original's set dedupes by pointer
+        auto at = v.begin();
+        while (at != v.end() && at->first <= rank)
+            ++at;
+        v.insert(at, {rank, cb});
+    }
+
+    template <class T>
+    void RunRanked(std::vector<std::pair<uint32_t, T>>& v)
+    {
+        for (auto& e : v)
+            e.second();
+    }
+
+    std::vector<std::pair<uint32_t, Callback>>& EnterWorldList() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
     std::vector<Callback>& GlueScreenList() { static std::vector<Callback> v; return v; }
 
-    void __cdecl RunEnterWorld() { for (Callback cb : EnterWorldList()) cb(); }
+    void __cdecl RunEnterWorld() { RunRanked(EnterWorldList()); }
     void __cdecl RunGlueScreen() { for (Callback cb : GlueScreenList()) cb(); }
-    std::vector<Callback>& AfterEnterWorldList() { static std::vector<Callback> v; return v; }
-    void __cdecl RunAfterEnterWorld() { for (Callback cb : AfterEnterWorldList()) cb(); }
+    std::vector<std::pair<uint32_t, Callback>>& AfterEnterWorldList() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
+    void __cdecl RunAfterEnterWorld() { RunRanked(AfterEnterWorldList()); }
 
     std::vector<std::pair<int, StockEventCallback>>& StockEventList() { static std::vector<std::pair<int, StockEventCallback>> v; return v; }
-    std::vector<Callback>& After403340List() { static std::vector<Callback> v; return v; }
+    std::vector<std::pair<uint32_t, Callback>>& After403340List() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
 
     // 0x81AA00 begins push ebp / mov ebp,esp / sub esp,0xC: six bytes.
     typedef int(__cdecl* Dispatch_t)(int, lua_State*, int);
@@ -48,28 +73,26 @@ namespace
     int __cdecl Detour403340(void* p)
     {
         const int r = g_403340Trampoline(p);
-        for (Callback cb : After403340List())
-            cb();
+        RunRanked(After403340List());
         return r;
     }
 
     // 0x495810 begins push ebp / mov ebp,esp / fld dword [ebp+0x14]: six bytes.
-    std::vector<Callback>& After495810List() { static std::vector<Callback> v; return v; }
+    std::vector<std::pair<uint32_t, Callback>>& After495810List() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
     typedef int(__cdecl* Fn495810_t)(void*, void*, void*, uint32_t);   // 4th = float dt, passed through as bits
     Fn495810_t g_495810Trampoline = nullptr;
     int __cdecl Detour495810(void* a, void* b, void* c, uint32_t d)
     {
         const int r = g_495810Trampoline(a, b, c, d);
-        for (Callback cb : After495810List())
-            cb();
+        RunRanked(After495810List());
         return r;
     }
 
     // 0x528C30 begins push ebp / mov ebp,esp / sub esp,8: six bytes. The original's detour (0x10275CA0)
     // runs list 0x10BE28AC, then jumps into the original with ecx = its hook object, so the function
     // takes nothing in registers; ours keeps every register anyway.
-    std::vector<Callback>& LeaveWorldList() { static std::vector<Callback> v; return v; }
-    void __cdecl RunLeaveWorld() { for (Callback cb : LeaveWorldList()) cb(); }
+    std::vector<std::pair<uint32_t, Callback>>& LeaveWorldList() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
+    void __cdecl RunLeaveWorld() { RunRanked(LeaveWorldList()); }
     void* g_528C30Trampoline = nullptr;
     __declspec(naked) void Detour528C30()
     {
@@ -88,8 +111,8 @@ namespace
 
     // 0x528F00 begins push ebp / mov ebp,esp / mov ecx,[0xC5DF88]: nine bytes, absolute operand. Same
     // shape as 0x528C30: list 0x10BE28CC, then into the original.
-    std::vector<Callback>& Before528F00List() { static std::vector<Callback> v; return v; }
-    void __cdecl RunBefore528F00() { for (Callback cb : Before528F00List()) cb(); }
+    std::vector<std::pair<uint32_t, Callback>>& Before528F00List() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
+    void __cdecl RunBefore528F00() { RunRanked(Before528F00List()); }
     void* g_528F00Trampoline = nullptr;
     __declspec(naked) void Detour528F00()
     {
@@ -106,8 +129,8 @@ namespace
 
     // 0x402910 (no arguments) begins with call 0x7E21B0, which a copied prologue cannot carry, so the
     // detour makes that call itself and continues at 0x402915; then list 0x10BE2A8C.
-    std::vector<Callback>& After402910List() { static std::vector<Callback> v; return v; }
-    void __cdecl RunAfter402910() { for (Callback cb : After402910List()) cb(); }
+    std::vector<std::pair<uint32_t, Callback>>& After402910List() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
+    void __cdecl RunAfter402910() { RunRanked(After402910List()); }
     __declspec(naked) void Detour402910()
     {
         __asm
@@ -141,27 +164,26 @@ namespace
 
     // 0x4F6F90 (__thiscall, no stack arguments) begins push esi / mov esi,ecx / mov eax,[esi+0x380]:
     // nine bytes. The original's detour (0x10276270) runs it, then list 0x10BE2AAC.
-    std::vector<Callback>& After4F6F90List() { static std::vector<Callback> v; return v; }
+    std::vector<std::pair<uint32_t, Callback>>& After4F6F90List() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
     typedef int(__fastcall* Fn4F6F90_t)(void*, void*);
     Fn4F6F90_t g_4F6F90Trampoline = nullptr;
     int __fastcall Detour4F6F90(void* ecx, void* edx)
     {
         const int r = g_4F6F90Trampoline(ecx, edx);
-        for (Callback cb : After4F6F90List())
-            cb();
+        RunRanked(After4F6F90List());
         return r;
     }
 
     // 0x6FC0F0 (removes an object from the client's list at 0xCA0ADC) begins push ebp / mov ebp,esp /
     // mov ecx,[0xCA0ADC]: nine bytes, absolute operand. The original's detour (FUN_10278840) runs
     // list 0x10BE2BEC with the object before the original.
-    std::vector<ObjectCallback>& ObjectFreeList() { static std::vector<ObjectCallback> v; return v; }
+    std::vector<std::pair<uint32_t, ObjectCallback>>& ObjectFreeList() { static std::vector<std::pair<uint32_t, ObjectCallback>> v; return v; }
     typedef void(__cdecl* Fn6FC0F0_t)(void*);
     Fn6FC0F0_t g_6FC0F0Trampoline = nullptr;
     void __cdecl Detour6FC0F0(void* object)
     {
-        for (ObjectCallback cb : ObjectFreeList())
-            cb(object);
+        for (auto& e : ObjectFreeList())
+            e.second(object);
         g_6FC0F0Trampoline(object);
     }
 
@@ -211,7 +233,7 @@ namespace
     // not flagged 0x10 and whose +0x10C / +0x110 differ -- its 0x616B10 record, looked up in 0xC5CE30
     // (0x6F6020) gets +0x18 = 1 and 0x512B50(&guid, 3) runs; last, list 0x10BE2970 (FUN_10278330).
     std::vector<Callback>& BeforeTargetList() { static std::vector<Callback> v; return v; }
-    std::vector<Callback>& AfterTargetList() { static std::vector<Callback> v; return v; }
+    std::vector<std::pair<uint32_t, Callback>>& AfterTargetList() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
     typedef void(__cdecl* Fn524BF0_t)(uint32_t, uint32_t);
     Fn524BF0_t g_524BF0Trampoline = nullptr;
     void __cdecl Detour524BF0(uint32_t lo, uint32_t hi)
@@ -238,8 +260,7 @@ namespace
                         }
             }
         }
-        for (Callback cb : AfterTargetList())
-            cb();
+        RunRanked(AfterTargetList());
     }
 
     // 0x6ECF80 (__thiscall, 7 stack arguments, ret 0x1C; 6 bytes). The original's detour 0x102762B0 (hook
@@ -377,7 +398,7 @@ namespace
     // 0x6DF050 (a stock packet handler) begins push ebp / mov ebp,esp / sub esp,0x20: six bytes. The
     // original's detour (0x102776A0) runs list 0x10BE28EC only when its flag 0x10BE2E38 is set and
     // stores the flag's inverse, so the list runs on every second call.
-    std::vector<Callback>& Alternate6DF050List() { static std::vector<Callback> v; return v; }
+    std::vector<std::pair<uint32_t, Callback>>& Alternate6DF050List() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
     typedef int(__cdecl* Fn6DF050_t)(void*, uint32_t, uint32_t, void*);
     Fn6DF050_t g_6DF050Trampoline = nullptr;
     bool g_6DF050Flag = false;
@@ -386,8 +407,7 @@ namespace
     {
         if (g_6DF050Flag)
         {
-            for (Callback cb : Alternate6DF050List())
-                cb();
+            RunRanked(Alternate6DF050List());
             g_6DF050Flag = false;
         }
         else
@@ -733,9 +753,9 @@ void ReplaceFunction(uint32_t target, void* fn)
 }
 
 void OnStockEvent(int eventId, StockEventCallback cb) { StockEventList().emplace_back(eventId, cb); }
-void OnAfter403340(Callback cb) { After403340List().push_back(cb); }
-void OnLeaveWorld(Callback cb) { LeaveWorldList().push_back(cb); }
-void OnBefore528F00(Callback cb) { Before528F00List().push_back(cb); }
+void OnAfter403340(Callback cb, uint32_t rank) { InsertRanked(After403340List(), cb, rank); }
+void OnLeaveWorld(Callback cb, uint32_t rank) { InsertRanked(LeaveWorldList(), cb, rank); }
+void OnBefore528F00(Callback cb, uint32_t rank) { InsertRanked(Before528F00List(), cb, rank); }
 void OnAfter6E7F50(ObjectCallback cb) { After6E7F50List().push_back(cb); }
 void OnBefore4943C0(void (*cb)(const uint32_t*)) { Before4943C0List().push_back(cb); }
 void OnAfterAddSpell(void (*cb)(uint32_t)) { AfterAddSpellList().push_back(cb); }
@@ -744,10 +764,10 @@ void RunAfterAddSpell(uint32_t spell)
     for (auto cb : AfterAddSpellList())
         cb(spell);
 }
-void OnAfter402910(Callback cb) { After402910List().push_back(cb); }
+void OnAfter402910(Callback cb, uint32_t rank) { InsertRanked(After402910List(), cb, rank); }
 void OnAfter5204C0(void (*cb)(void* first)) { After5204C0List().push_back(cb); }
-void OnAfter4F6F90(Callback cb) { After4F6F90List().push_back(cb); }
-void OnAfter495810(Callback cb) { After495810List().push_back(cb); }
+void OnAfter4F6F90(Callback cb, uint32_t rank) { InsertRanked(After4F6F90List(), cb, rank); }
+void OnAfter495810(Callback cb, uint32_t rank) { InsertRanked(After495810List(), cb, rank); }
 
 const char* EventName(int eventId)
 {
@@ -759,17 +779,17 @@ const char* EventName(int eventId)
     return *reinterpret_cast<const char* const*>(entries[eventId] + 0x14);
 }
 
-void OnEnterWorld(Callback cb) { EnterWorldList().push_back(cb); }
+void OnEnterWorld(Callback cb, uint32_t rank) { InsertRanked(EnterWorldList(), cb, rank); }
 void OnGlueScreen(Callback cb) { GlueScreenList().push_back(cb); }
-void OnAfterEnterWorld(Callback cb) { AfterEnterWorldList().push_back(cb); }
-void OnObjectFree(ObjectCallback cb) { ObjectFreeList().push_back(cb); }
-void OnAlternate6DF050(Callback cb) { Alternate6DF050List().push_back(cb); }
+void OnAfterEnterWorld(Callback cb, uint32_t rank) { InsertRanked(AfterEnterWorldList(), cb, rank); }
+void OnObjectFree(ObjectCallback cb, uint32_t rank) { InsertRanked(ObjectFreeList(), cb, rank); }
+void OnAlternate6DF050(Callback cb, uint32_t rank) { InsertRanked(Alternate6DF050List(), cb, rank); }
 void OnGameObjectUse(ObjectCallback cb) { GameObjectUseList().push_back(cb); }
 void OnItemUse(ObjectCallback cb) { ItemUseList().push_back(cb); }
 void OnAfter743EC0(ObjectCallback cb) { After743EC0List().push_back(cb); }
 void OnBeforeTargetChange(Callback cb) { BeforeTargetList().push_back(cb); }
 void OnAfter52A980(Callback cb) { After52A980List().push_back(cb); }
-void OnAfterTargetChange(Callback cb) { AfterTargetList().push_back(cb); }
+void OnAfterTargetChange(Callback cb, uint32_t rank) { InsertRanked(AfterTargetList(), cb, rank); }
 void OnBefore6ECF80(void (*cb)(uint32_t)) { Before6ECF80List().push_back(cb); }
 void OnBefore724820(UnitSpellVeto cb, uint32_t site)
 {

@@ -388,8 +388,8 @@ namespace
         g_openArchive = reinterpret_cast<OpenArchive_t>(AscRuntime::Detour(0x421950, 5, reinterpret_cast<void*>(&OpenArchiveDetour)));
         g_scanAddOns = reinterpret_cast<ScanAddOns_t>(AscRuntime::Detour(0x5F8F50, 6, reinterpret_cast<void*>(&ScanAddOnsDetour)));
         AscRuntime::ReplaceFunction(0x667EF9, reinterpret_cast<void*>(&CachePathHook));
-        AscRuntime::OnAfter403340(&Tick);
-        AscRuntime::OnAfter495810(&Tick);
+        AscRuntime::OnAfter403340(&Tick, 10);     // measured rank 10
+        AscRuntime::OnAfter495810(&Tick, 1);      // measured rank 1
         reinterpret_cast<void(__cdecl*)(const char*, int(__cdecl*)(const char*, const char*), int, int)>(0x769100)(
             "realmdata", &RealmDataCommand, 1, 0);
     }

@@ -396,12 +396,12 @@ namespace
 
     void Init()   // FUN_102daaf0
     {
-        AscRuntime::OnEnterWorld(&LoadCones);
+        AscRuntime::OnEnterWorld(&LoadCones, 13);         // measured rank 13
         AscClientOptions::QueueWorldCVar({"aoeRadiusIndicatorSelf", "0", 1, 3, nullptr, nullptr, false, reinterpret_cast<void**>(const_cast<CVar**>(&g_self))});
         AscClientOptions::QueueWorldCVar({"aoeRadiusIndicatorEnemy", "0", 1, 3, nullptr, nullptr, false, reinterpret_cast<void**>(const_cast<CVar**>(&g_enemy))});
         AscClientOptions::QueueWorldCVar({"aoeRadiusIndicatorFriendly", "0", 1, 3, nullptr, nullptr, false, reinterpret_cast<void**>(const_cast<CVar**>(&g_friendly))});
-        AscRuntime::OnAfter4F6F90(&Render);
-        AscRuntime::OnAlternate6DF050(&Tick);
+        AscRuntime::OnAfter4F6F90(&Render, 1);            // measured rank 1
+        AscRuntime::OnAlternate6DF050(&Tick, 2);          // measured rank 2
         g_7460C0 = reinterpret_cast<Fn0_t>(AscRuntime::Detour(0x7460C0, 6, reinterpret_cast<void*>(&Hook7460C0)));
         AscClientOptions::QueueWorldCVar({"showQuestUnitCircles", "1", 1, 4, nullptr, nullptr, false, reinterpret_cast<void**>(const_cast<CVar**>(&g_quest))});
         AscClientOptions::QueueWorldCVar({"ObjectSelectionCircleSelf", "0", 1, 4, nullptr, nullptr, false, reinterpret_cast<void**>(const_cast<CVar**>(&g_circle))});

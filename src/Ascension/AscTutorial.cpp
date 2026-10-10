@@ -1179,8 +1179,8 @@ namespace
         AscDbcPatch::Register(0x6A7, "DBFilesClient\\TutorialObjectives.dbc", 0x20, 1ull << 7, AfterObjectivePatch);
         AscDbcPatch::Register(0x6AC, "DBFilesClient\\TutorialKeywords.dbc", 0x44, 0x1FCull, AfterKeywordPatch);
         AscRuntime::OnGlueScreen(ResetAll);
-        AscRuntime::OnAfterEnterWorld(SeedWatches);
-        AscRuntime::OnAfter403340(LevelWatch);
+        AscRuntime::OnAfterEnterWorld(SeedWatches, 8);   // measured rank 8
+        AscRuntime::OnAfter403340(LevelWatch, 11);       // measured rank 11
         AscRuntime::OnStockEvent(0x258, RefreshCompleted);
         AscRuntime::OnStockEvent(0x1C0, RefreshAddedOnEvent);
         sDC.AddPacketHandler(0x6AF, CNetClientCustomPacket((void*)&OnClaimRewardsResult, nullptr));

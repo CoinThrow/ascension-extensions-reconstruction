@@ -54,6 +54,15 @@ All five captured lists insert by the measured order (`InsertByCapturedOrder`): 
 not reproduce them because registration execution order does not follow the call sites. The
 aura-application list also carries one original-only callback that is not reconstructed - it runs after
 the five captured entries, matching the rule that unknown callbacks follow the captured entries.
+The eleven lifecycle lists with more than one registrant (EnterWorld, AfterEnterWorld, After403340,
+Alternate6DF050, LeaveWorld, Before528F00, After402910, After495810, After4F6F90, ObjectFree,
+AfterTargetChange) were measured the same way on 2026-10-11 and insert by measured rank
+(`InsertRanked`); modules pass their callback's rank in the pinned walk, unknowns and callbacks without
+a measured rank follow the ranked entries. The lists are MSVC `unordered_set`s, so the native iteration
+order is the set's hash-bucket order of the runtime pointer values and permutes with the DLL load base;
+the pinned ranks reproduce the reference base (0x67E30000), the base of the emulated and measured
+snapshots. See `docs/CALLBACK-ORDER-MEASURED.md` for the walks, the base-dependence and the per-list
+ranks.
 
 ## Building
 

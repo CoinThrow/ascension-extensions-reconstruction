@@ -216,7 +216,7 @@ namespace
     // 0x1031f8a0
     void Init()
     {
-        AscRuntime::OnEnterWorld(Start);
+        AscRuntime::OnEnterWorld(Start, 15);    // measured rank 15
         AscRuntime::OnGlueScreen(Stop);
     }
 

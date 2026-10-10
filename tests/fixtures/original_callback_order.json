@@ -5,7 +5,7 @@
   "hash": "FNV-1a over four little-endian relocated callback-pointer bytes",
   "bucket_mask": 7,
   "method": "Offline x86 startup emulation for Before71E930 / After80B5D0: follow head->next nodes to head, reading callback at node+8; closed list count verified. Before724820 / EffectFilter / VisualHide additionally measured from live list traversal in two independent game sessions of a sibling build; addresses translated with per-band deltas validated against both emulated lists.",
-  "limits": "Before71E930 and After80B5D0 are complete for this image. Before724820 carries one original-only callback (runtime-registered, no static call site; reconstructed 2026-10-10 as AscAccount::MentorAuraGate, called last) that runs after the five captured entries. Remaining lists are unmeasured.",
+  "limits": "Before71E930 and After80B5D0 are complete for this image. Before724820 carries one original-only callback (runtime-registered, no static call site; reconstructed 2026-10-10 as AscAccount::MentorAuraGate, called last) that runs after the five captured entries. The lifecycle lists EnterWorld, AfterEnterWorld, After403340, Alternate6DF050, LeaveWorld, Before528F00, After402910, After495810, After4F6F90, ObjectFree and AfterTargetChange were measured 2026-10-11 (live walks in four full-memory sessions; ranks in each section). Their iteration order is the set's hash-bucket order of the runtime pointer values and permutes with the load base, so the ranks pin the reference base 0x67E30000. Stock events, GameObjectUse and ItemUse have a single registrant each (order trivial); GlueScreen and the single-entry lists are order-irrelevant or unmeasured.",
   "Before71E930": {
     "object": "0x10be2b8c",
     "callbacks": [
@@ -45,6 +45,452 @@
     "callbacks": [
       {"name": "AscSpellVisuals::HideVisual", "function": "0x10323410", "site": "0x10323147"},
       {"name": "AscQuestSpellHide::HideVisual", "function": "0x10112640", "site": "0x1011262f"}
+    ]
+  },
+  "EnterWorld": {
+    "object": "0x10be5984",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscSpellCharges::OnEnterWorld",
+        "function": "0x10322980",
+        "site": "0x10322D11"
+      },
+      {
+        "rank": 1,
+        "name": "AscWorldEntryTweaks::Send561",
+        "function": "0x10a4d610",
+        "site": "0x10a69e3b"
+      },
+      {
+        "rank": 2,
+        "name": "AscGraphics::CullingOn",
+        "function": "0x1025ccd0",
+        "site": "0x1026803c"
+      },
+      {
+        "rank": 3,
+        "name": "AscProfiler::Arm",
+        "function": "0x102c6100",
+        "site": "0x102c6645"
+      },
+      {
+        "rank": 4,
+        "name": "AscExtraActionButton::Start",
+        "function": "0x103246d0",
+        "site": "0x10324822",
+        "note": "rank inferred from the init pairing"
+      },
+      {
+        "rank": 5,
+        "name": "AscGraphics::BuildOccluders",
+        "function": "0x1025cd80",
+        "site": "0x10268046"
+      },
+      {
+        "rank": 6,
+        "name": "AscTemporalContracts::OnEnterWorld",
+        "function": "0x1033e3f0",
+        "site": "0x1033bd13"
+      },
+      {
+        "rank": 7,
+        "name": "AscBugTracker::Clear",
+        "function": "0x100e72c0",
+        "site": "0x100e77e9"
+      },
+      {
+        "rank": 8,
+        "name": "AscMysticEnchant::OnEnterWorld",
+        "function": "0x102ecea0",
+        "site": "0x102ec7f5"
+      },
+      {
+        "rank": 9,
+        "name": "AscWildcardRolls::OnEnterWorld",
+        "function": "0x10a34470",
+        "site": "0x10a3402f"
+      },
+      {
+        "rank": 10,
+        "name": "AscWildcardRapid::ResetOnEnterWorld",
+        "function": "0x10a36850",
+        "site": "0x10a37550"
+      },
+      {
+        "rank": 11,
+        "name": "AscCAMgr::BuildIndex",
+        "function": "0x10172410",
+        "site": "0x10171ef4"
+      },
+      {
+        "rank": 12,
+        "name": "AscSpellShadow::LoadTextures",
+        "function": "0x10323770",
+        "site": "0x103242b5",
+        "note": "rank inferred from the init pairing"
+      },
+      {
+        "rank": 13,
+        "name": "AscUnitSelect::LoadCones",
+        "function": "0x102dcdd0",
+        "site": "0x102dd705"
+      },
+      {
+        "rank": 14,
+        "name": "AscSuperTrack::OnEnterWorld",
+        "function": "0x10338e70",
+        "site": "0x10337ba3"
+      },
+      {
+        "rank": 15,
+        "name": "AscSpellActivationOverlay::Start",
+        "function": "0x10322550",
+        "site": "0x103224dd"
+      },
+      {
+        "rank": 16,
+        "name": "AscSmallHooks::BankManagerEnterWorld",
+        "function": "0x10238610",
+        "site": "0x1023859d",
+        "note": "rank inferred from the init pairing"
+      },
+      {
+        "rank": 17,
+        "name": "(original-only, not reconstructed)",
+        "note": "Original function 0x10229210, registered by the EquipmentSet-family init; runs last of the measured walk."
+      }
+    ]
+  },
+  "AfterEnterWorld": {
+    "object": "0x10be59a4",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscWorldEntryTweaks::Send561",
+        "function": "0x10a4d610"
+      },
+      {
+        "rank": 1,
+        "name": "AscWorldEntryTweaks::StanceForms",
+        "function": "0x10a63010"
+      },
+      {
+        "rank": 2,
+        "name": "AscWorldEntryTweaks::StanceJump",
+        "function": "0x10a60810"
+      },
+      {
+        "rank": 3,
+        "name": "AscWorldEntryTweaks::SkipCheck809572",
+        "function": "0x10a76770"
+      },
+      {
+        "rank": 4,
+        "name": "AscChallenge::OnEnteredWorld",
+        "function": "0x1013bf00"
+      },
+      {
+        "rank": 5,
+        "name": "AscPlayerPoll::RequestAfterEnterWorld",
+        "function": "0x102db240"
+      },
+      {
+        "rank": 6,
+        "name": "AscWorldEntryTweaks::LoadAntiCheat",
+        "function": "0x10a53a40"
+      },
+      {
+        "rank": 7,
+        "name": "AscWorldEntryTweaks::StartKillSwitch",
+        "function": "0x10a3d780"
+      },
+      {
+        "rank": 8,
+        "name": "AscTutorial::SeedWatches",
+        "function": "0x10a1ba90"
+      },
+      {
+        "rank": 9,
+        "name": "AscTooltipInsertFix::Apply",
+        "note": "Not present in the measured walk (reconstruction superset); sorts after the ranked entries."
+      }
+    ]
+  },
+  "After403340": {
+    "object": "0x10be59c4",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept). This list was pinned from donor_full1 (0x66950000): the reference-base walk was cut off by an unmapped heap block. Ranks are that walk's positions.",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "(original-only, 0x10182550)"
+      },
+      {
+        "rank": 1,
+        "name": "AscChallenge::Tick",
+        "function": "0x1013be30"
+      },
+      {
+        "rank": 2,
+        "name": "AscProfiler::DisconnectIfTripped",
+        "function": "0x102c6120"
+      },
+      {
+        "rank": 3,
+        "name": "(original-only, 0x10a3d790)"
+      },
+      {
+        "rank": 4,
+        "name": "(original-only, effect sweep 0x10279570)"
+      },
+      {
+        "rank": 5,
+        "name": "AscSpellCharges::Tick",
+        "function": "0x10322990"
+      },
+      {
+        "rank": 6,
+        "name": "AscMysticEnchant::OnTick",
+        "function": "0x102f2b00"
+      },
+      {
+        "rank": 7,
+        "name": "AscEventPackets::WatchLevel",
+        "function": "0x100e1810"
+      },
+      {
+        "rank": 8,
+        "name": "(original-only, 0x101ac7c0)"
+      },
+      {
+        "rank": 9,
+        "name": "(original-only, 0x102a67f0)"
+      },
+      {
+        "rank": 10,
+        "name": "AscRealmData::Tick",
+        "function": "0x102fee60"
+      },
+      {
+        "rank": 11,
+        "name": "AscTutorial::LevelWatch",
+        "function": "0x10a1ba40"
+      },
+      {
+        "rank": 12,
+        "name": "(original-only, 0x10336530)"
+      },
+      {
+        "rank": 13,
+        "name": "(original-only, 0x10a4e900)"
+      },
+      {
+        "rank": 14,
+        "name": "(original-only, 0x100d3640)"
+      },
+      {
+        "rank": 15,
+        "name": "AscNamePlates::Tick",
+        "function": "0x102c55b0"
+      }
+    ]
+  },
+  "Alternate6DF050": {
+    "object": "0x10be58e4",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscObjectAddon::KeepActivePlayer",
+        "function": "0x102cfc60",
+        "site": "0x102d0b92"
+      },
+      {
+        "rank": 1,
+        "name": "(original-only, 0x10a3d760, runtime-registered)"
+      },
+      {
+        "rank": 2,
+        "name": "AscUnitSelect::Tick",
+        "function": "0x102ddce0",
+        "site": "0x102dd776"
+      },
+      {
+        "rank": 3,
+        "name": "AscGraphics::MapCap",
+        "function": "0x1025cc00",
+        "site": "0x10268028"
+      },
+      {
+        "rank": 4,
+        "name": "AscRaidVideo::Tick",
+        "function": "0x102dfd40",
+        "site": "0x102df575"
+      }
+    ]
+  },
+  "LeaveWorld": {
+    "object": "0x10be58a4",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscNamePlates::ClearPlates",
+        "function": "0x102c0220",
+        "site": "0x102c2931"
+      },
+      {
+        "rank": 1,
+        "name": "(original-only, 0x10278160, aura-type side map clear)"
+      },
+      {
+        "rank": 2,
+        "name": "AscMovementForce::Reset",
+        "function": "0x102bbb60",
+        "site": "0x102bc425"
+      },
+      {
+        "rank": 3,
+        "name": "AscProfiler::Disarm",
+        "function": "0x102c60d0",
+        "site": "0x102c664f"
+      }
+    ]
+  },
+  "Before528F00": {
+    "object": "0x10be58c4",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscCacheFiles::Prune",
+        "function": "0x10a3d750",
+        "site": "0x10a6bd44"
+      },
+      {
+        "rank": 1,
+        "name": "(original-only, 0x10278160, aura-type side map clear)"
+      },
+      {
+        "rank": 2,
+        "name": "AscMovementForce::Reset",
+        "function": "0x102bbb60",
+        "site": "0x102bc42f"
+      },
+      {
+        "rank": 3,
+        "name": "AscProfiler::Disarm",
+        "function": "0x102c60d0",
+        "site": "0x102c6659"
+      }
+    ]
+  },
+  "After402910": {
+    "object": "0x10be5a84",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscCacheFiles::Save",
+        "function": "0x10a3d770",
+        "site": "0x10a6bd4e"
+      },
+      {
+        "rank": 1,
+        "name": "(original-only, 0x10278160, aura-type side map clear)"
+      },
+      {
+        "rank": 2,
+        "name": "AscMovementForce::Reset",
+        "function": "0x102bbb60",
+        "site": "0x102bc439"
+      }
+    ]
+  },
+  "After495810": {
+    "object": "0x10be5884",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscCharacterCreate::WatchComponent",
+        "function": "0x1018af30",
+        "site": "0x1018b0b9"
+      },
+      {
+        "rank": 1,
+        "name": "AscRealmData::Tick",
+        "function": "0x102fee60",
+        "site": "0x102fb9a7"
+      },
+      {
+        "rank": 2,
+        "name": "(original-only, 0x10a79460, runtime-registered)"
+      }
+    ]
+  },
+  "After4F6F90": {
+    "object": "0x10be5aa4",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscGraphics::DrawOcclusion",
+        "function": "0x10268150",
+        "site": "0x10268050"
+      },
+      {
+        "rank": 1,
+        "name": "AscUnitSelect::Render",
+        "function": "0x102deb70",
+        "site": "0x102dd76c"
+      },
+      {
+        "rank": 2,
+        "name": "(original-only, 0x1008d970, the shared empty stub)"
+      }
+    ]
+  },
+  "ObjectFree": {
+    "object": "0x10be5be4",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "(original-only, 0x10278170, runtime-registered)"
+      },
+      {
+        "rank": 1,
+        "name": "AscAuraAmounts::ForgetObject",
+        "function": "0x10a13200",
+        "site": "0x10a14d74"
+      },
+      {
+        "rank": 2,
+        "name": "AscObjectAddon::OnObjectFree",
+        "function": "0x102cfbb0",
+        "site": "0x102d0b88"
+      }
+    ]
+  },
+  "AfterTargetChange": {
+    "object": "0x10be5964",
+    "method": "Live walk of the original's MSVC unordered_set linked list in four full-memory sessions (2026-10-11; donors donor_charselect2/donor_v3 at base 0x67E30000, donor_full1 0x66950000, donor_full2 0x63E40000). Iteration is the set's hash-bucket order of the runtime pointer values; the pinned order below is the reference-base 0x67E30000 walk (donor_charselect2/v3), which for collision-free lists equals registration order. Orders at other load bases permute the collisions; ranks reproduce the pinned base. Ranks are the pinned walk positions; callbacks without a measured rank sort after these (registration order kept).",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscCamera::AfterTargetChange",
+        "function": "0x1019c230",
+        "site": "0x1019c32f"
+      },
+      {
+        "rank": 1,
+        "name": "AscAddonTaint::AfterTargetChange",
+        "function": "0x10316980",
+        "site": "0x10314d99"
+      }
     ]
   }
 }

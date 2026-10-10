@@ -5340,7 +5340,7 @@ namespace
         sDC.AddPacketHandler(0x6E2, CNetClientCustomPacket((void*)&OnInspectResult, nullptr));
         sDC.AddPacketHandler(0x6D2, CNetClientCustomPacket((void*)&OnStatSuggestion, nullptr));
         sDC.AddPacketHandler(0x64A, CNetClientCustomPacket((void*)&OnPatchEntry, nullptr));
-        AscRuntime::OnEnterWorld(BuildIndex);   // 0x10172650 -> FUN_1014a530
+        AscRuntime::OnEnterWorld(BuildIndex, 11);   // measured rank 11 (0x10172650 -> FUN_1014a530)
         AscRuntime::OnGlueScreen(OnGlueScreen);
         AscRuntime::OnAfter403340(Update);
         // The suggestion manager's registration (0x10333880): glue reset, the tick, and a dirty mark on

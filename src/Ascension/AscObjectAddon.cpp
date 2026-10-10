@@ -134,8 +134,8 @@ namespace
     void Init()
     {
         sDC.AddPacketHandler(0x578, CNetClientCustomPacket((void*)&OnObjectAddon, nullptr));
-        AscRuntime::OnObjectFree(&OnObjectFree);
-        AscRuntime::OnAlternate6DF050(&KeepActivePlayer);
+        AscRuntime::OnObjectFree(&OnObjectFree, 2);                // measured rank 2
+        AscRuntime::OnAlternate6DF050(&KeepActivePlayer, 0);       // measured rank 0
     }
 
     AscBindings::Module s_module(nullptr, 0, &Init);

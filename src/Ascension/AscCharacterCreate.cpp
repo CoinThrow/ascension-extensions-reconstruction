@@ -1508,7 +1508,7 @@ namespace
     void InitPreview()   // FUN_1018b290
     {
         AscRuntime::OnGlueScreen(ResetPreview);
-        AscRuntime::OnAfter495810(WatchComponent);
+        AscRuntime::OnAfter495810(WatchComponent, 0);   // measured rank 0
         AscRuntime::ReplaceFunction(0x4E0C10, reinterpret_cast<void*>(&SetCharacterCreateFacing));
         AscRuntime::ReplaceFunction(0x4E0BE0, reinterpret_cast<void*>(&GetCharacterCreateFacing));
         g_camera = reinterpret_cast<Camera_t>(AscRuntime::Detour(0x4C1290, 6, reinterpret_cast<void*>(&CameraDetour)));

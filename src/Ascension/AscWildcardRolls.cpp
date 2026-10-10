@@ -540,7 +540,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnEnterWorld(OnEnterWorld);
+        AscRuntime::OnEnterWorld(OnEnterWorld, 9);   // measured rank 9
         sDC.AddPacketHandler(0x61E, CNetClientCustomPacket((void*)&OnUnlearnResult, nullptr));
         sDC.AddPacketHandler(0x644, CNetClientCustomPacket((void*)&OnRollResult, nullptr));
         sDC.AddPacketHandler(0x621, CNetClientCustomPacket((void*)&OnEntryLearned, nullptr));

@@ -107,8 +107,8 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnBefore528F00(&Prune);
-        AscRuntime::OnAfter402910(&Save);
+        AscRuntime::OnBefore528F00(&Prune, 0);   // measured rank 0
+        AscRuntime::OnAfter402910(&Save, 0);     // measured rank 0
     }
 
     AscBindings::Module s_module(nullptr, 0, &Init);

@@ -678,9 +678,9 @@ namespace
 
     void Init()   // FUN_102b9830
     {
-        AscRuntime::OnLeaveWorld(Reset);
-        AscRuntime::OnBefore528F00(Reset);
-        AscRuntime::OnAfter402910(Reset);
+        AscRuntime::OnLeaveWorld(Reset, 2);        // measured rank 2
+        AscRuntime::OnBefore528F00(Reset, 2);      // measured rank 2
+        AscRuntime::OnAfter402910(Reset, 2);       // measured rank 2
         sDC.AddPacketHandler(0x761, CNetClientCustomPacket((void*)&OnApply, nullptr));
         sDC.AddPacketHandler(0x762, CNetClientCustomPacket((void*)&OnRemove, nullptr));
         sDC.AddPacketHandler(0x765, CNetClientCustomPacket((void*)&OnApplyOther, nullptr));

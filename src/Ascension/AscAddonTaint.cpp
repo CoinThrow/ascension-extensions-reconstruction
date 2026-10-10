@@ -190,7 +190,7 @@ namespace
     {
         g_5191C0 = Hook<Fn1_t>(0x5191C0, 10, reinterpret_cast<void*>(&Hook5191C0));   // hooked 0x5191C0
         AscRuntime::OnBeforeTargetChange(BeforeTargetChange);
-        AscRuntime::OnAfterTargetChange(AfterTargetChange);
+        AscRuntime::OnAfterTargetChange(AfterTargetChange, 1);   // measured rank 1
         g_816DA0 = Hook<Fn1_t>(0x816DA0, 10, reinterpret_cast<void*>(&Hook816DA0));   // hooked 0x816DA0
         AscRuntime::ReplaceFunction(0x510430, reinterpret_cast<void*>(&Hook510430));
         g_51AC90 = Hook<Fn0_t>(0x51AC90, 7, reinterpret_cast<void*>(&Hook51AC90));   // hooked 0x51AC90

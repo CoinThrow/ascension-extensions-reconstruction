@@ -609,8 +609,8 @@ namespace
         static const uint8_t kNop8[8] = {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
         Patch(0x7258CE, kNop8, 8);
 
-        AscRuntime::OnLeaveWorld(&ClearPlates);
-        AscRuntime::OnAfter403340(&Tick);
+        AscRuntime::OnLeaveWorld(&ClearPlates, 0);   // measured rank 0
+        AscRuntime::OnAfter403340(&Tick, 15);        // measured rank 15
         g_plateUpdate = reinterpret_cast<PlateUpdate_t>(AscRuntime::Detour(0x98E9F0, 6, reinterpret_cast<void*>(&PlateUpdateDetour)));
         g_platePass = reinterpret_cast<PlatePass_t>(AscRuntime::Detour(0x725890, 6, reinterpret_cast<void*>(&PlatePassDetour)));
         g_platePosition = reinterpret_cast<PlatePosition_t>(AscRuntime::Detour(0x72B060, 6, reinterpret_cast<void*>(&PlatePositionDetour)));

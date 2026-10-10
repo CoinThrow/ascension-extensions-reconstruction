@@ -431,10 +431,10 @@ namespace
         g_send = reinterpret_cast<Send_t>(AscRuntime::Detour(0x632B50, 6, reinterpret_cast<void*>(&SendDetour)));
         g_631FC0 = reinterpret_cast<Clear_t>(AscRuntime::Detour(0x631FC0, 8, reinterpret_cast<void*>(&ClearHandler)));
         CloseHandle(reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, &Watchdog, nullptr, 0, nullptr)));
-        AscRuntime::OnEnterWorld(&Arm);
-        AscRuntime::OnLeaveWorld(&Disarm);
-        AscRuntime::OnBefore528F00(&Disarm);
-        AscRuntime::OnAfter403340(&DisconnectIfTripped);
+        AscRuntime::OnEnterWorld(&Arm, 3);                        // measured rank 3
+        AscRuntime::OnLeaveWorld(&Disarm, 3);                     // measured rank 3
+        AscRuntime::OnBefore528F00(&Disarm, 3);                   // measured rank 3
+        AscRuntime::OnAfter403340(&DisconnectIfTripped, 2);       // measured rank 2
     }
 
     const AscBindings::Binding kBindings[] = {

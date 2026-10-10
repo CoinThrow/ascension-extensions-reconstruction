@@ -2979,9 +2979,9 @@ namespace
         sDC.AddPacketHandler(0x56B, CNetClientCustomPacket((void*)&OnPatch, nullptr));
         sDC.AddPacketHandler(0x619, CNetClientCustomPacket((void*)&OnProgress, nullptr));
         sDC.AddPacketHandler(0x734, CNetClientCustomPacket((void*)&OnPurchaseExtractResult, nullptr));
-        AscRuntime::OnEnterWorld(&OnEnterWorld);
+        AscRuntime::OnEnterWorld(&OnEnterWorld, 8);   // measured rank 8
         AscRuntime::OnGlueScreen(&OnGlueScreen);
-        AscRuntime::OnAfter403340(&OnTick);
+        AscRuntime::OnAfter403340(&OnTick, 6);        // measured rank 6
         AscRuntime::OnGameObjectUse(&OnGameObjectUse);
     }
 

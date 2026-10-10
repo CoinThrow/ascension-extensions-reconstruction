@@ -143,7 +143,7 @@ namespace
 
     void Init()   // FUN_102dc960 (the CVars are registered from CVar.cpp's glue vector)
     {
-        AscRuntime::OnAlternate6DF050(&Tick);
+        AscRuntime::OnAlternate6DF050(&Tick, 4);   // measured rank 4
         AscRuntime::OnGlueScreen(&Restore);
         g_766640 = reinterpret_cast<Write_t>(AscRuntime::Detour(0x766640, 9, reinterpret_cast<void*>(&Hook766640)));
     }

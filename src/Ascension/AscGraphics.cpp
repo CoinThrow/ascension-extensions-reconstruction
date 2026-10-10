@@ -695,11 +695,11 @@ namespace
         g_cloudsSet = reinterpret_cast<CloudsSet_t>(AscRuntime::Detour(0x7F1CD0, 6, reinterpret_cast<V>(&CloudsSetDetour)));
         g_cloudsTick = reinterpret_cast<CloudsTick_t>(AscRuntime::Detour(0x7F1010, 5, reinterpret_cast<V>(&CloudsTickDetour)));
         AscRuntime::ReplaceFunction(0x780770, reinterpret_cast<V>(&FarClipClamp));
-        AscRuntime::OnAlternate6DF050(&MapCap);
+        AscRuntime::OnAlternate6DF050(&MapCap, 3);        // measured rank 3
         AscRuntime::OnAfter5204C0(&ReapplyFarClip);
-        AscRuntime::OnEnterWorld(&CullingOn);
-        AscRuntime::OnEnterWorld(&BuildOccluders);
-        AscRuntime::OnAfter4F6F90(&DrawOcclusion);
+        AscRuntime::OnEnterWorld(&CullingOn, 2);          // measured rank 2
+        AscRuntime::OnEnterWorld(&BuildOccluders, 5);     // measured rank 5
+        AscRuntime::OnAfter4F6F90(&DrawOcclusion, 0);     // measured rank 0
         AscRuntime::ReplaceFunction(0x6815C0, reinterpret_cast<V>(&ReturnZero));
         AscRuntime::ReplaceFunction(0x681580, reinterpret_cast<V>(&ReturnZero));
     }

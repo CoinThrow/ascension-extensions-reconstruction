@@ -239,7 +239,7 @@ namespace
         // FUN_100e71b0 (`mov ecx, report; jmp FUN_100e76f0`): the report is cleared on every glue screen
         // and at every world entry.
         AscRuntime::OnGlueScreen(&Clear);
-        AscRuntime::OnEnterWorld(&Clear);
+        AscRuntime::OnEnterWorld(&Clear, 7);   // measured rank 7
     }
 
     const AscBindings::Binding kBindings[] = {

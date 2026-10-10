@@ -221,7 +221,7 @@ namespace
     // FUN_10236a60: the module's init.
     void Init()
     {
-        AscRuntime::OnEnterWorld(Start);
+        AscRuntime::OnEnterWorld(Start, 4);   // measured rank 4
         AscRuntime::OnGlueScreen(Stop);
     }
 
