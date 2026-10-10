@@ -16,11 +16,35 @@ functions are plain code. Slot 18 is now fully rebuilt and slot 20 refined (bran
 selector). Scroll slots 12/20 are absent from the located installer (wildcard path to find); A3/A4
 keep their notes with better routes.*
 
+*Update 2026-10-11 (final deep dive): three of the four remaining unknowns are closed with evidence
+and the callback-order work is done for the multi-registrant lists.*
+- **Callback orders — DONE for the eleven multi-registrant lifecycle lists** (`callback-order-all-lists`,
+  `9b7a60b`): the lists are MSVC `unordered_set`s whose iteration is the hash-bucket order of the
+  relocated pointers (base-dependent!); walked live in four full-memory sessions (new
+  `re\donor_dump4.py` — the old curated dumps missed the `0x26xxxxxx` heap arena) and pinned at the
+  reference base `0x67E30000`. Modules pass measured ranks; `native_callback_order.py`: 3849 checks, 0
+  failures. Remaining: GlueScreen's 45 registrants stay unranked (mapping deferred; walk data ready).
+- **A2 — the wildcard install path is FOUND**: `sub_1015C9C0`'s complete slot/gate table is decoded
+  (the wildcard block = `mode & 4` gating the five `+436` slots 44/25/26/27/28; per-slot gates
+  `mode&7`/`mode&3`/`mode&1`; unlearn vectors never receive indices 12/14/15/20/21 in any mode — so
+  the recon's masks are right and only the rule BODIES for unlearn 12/20 remain unlocated). Evidence:
+  `re\out\A2-WILDCARD-INSTALL-FOUND.md`.
+- **A3 — CLOSED**: the TemporalContractMgr type vector (+0x24 at 0x10D3F238) has no writer in the
+  deployed image (ctor/zeroing + readers only). Vestigial; the empty shape is faithful.
+- **A4 — CLOSED**: the JSONContentMgr (0x10BE5FA0) has no writer and no reader (ctor + DllMain + dtor
+  only; not the VM either). Vestigial; `DecodeJSONContent` returning nothing is faithful.
+  (Branch `a-items-closure`, `fbdde94`; VM residual 5's JSONContentMgr item closed in
+  `VM-FULL-ANALYSIS.md`.)
+- **Drop-in**: a branch build booted the live client to a stable 40 s+ session (smoke test); the
+  game folder was restored to the user's own recon build afterwards.*
+
 ## Closed in this pipeline (each its own branch, ready for review)
 
 | branch | what it does |
 | --- | --- |
 | `ca-rules-dependencies` | CA rules from the original rule objects: slot 20 wired + refined (talent-only, active-player-only), **slot 18 rebuilt** (`TemplateRankCheck`) — 2026-10-11 deep dive |
+| `callback-order-all-lists` | **measured ranks for the eleven multi-registrant lifecycle lists** (`InsertRanked`); fixture + tests extended (3849 checks) — 2026-10-11 final deep dive |
+| `a-items-closure` | A3/A4 closed with deployed-image xref evidence (no writers exist; vestigial subsystems) — 2026-10-11 |
 | `ca-pending-request-flow` | fills the manager `+0x198` request vector at the transcribed CMSG 0x61D sends and clears it on SMSG 0x61E / reset, so `InFlight`, `IsPendingEntryID` and the pending-build signal wait actually wait |
 | `temporal-contracts-status` | records the confirmed VM-side un-recoverability of the contract-type fill with the byte-search evidence |
 | `ca-layout-columns` | retires the superseded partial `GetAllEntries` pair (never bound; the live `AscCAMgr` FUN_1016f5b0 + PushEntry path already emits every column) |
@@ -44,16 +68,18 @@ byte-search across the deployed image finds no plain-code reference of any encod
    ≥ current rank + 1 ranks in it) — wired through `AscBuildCreator::TemplateRankCheck`
    (`ca-rules-dependencies`, `3d79d9c`). Slot 20 refined in the same commit (talent-only,
    active-player-only).
-2. **Scroll-of-Fortune accounting for unlearn slots 12/20/21** — narrowed 2026-10-11: the unlearn rule
-   arrays (`+0x1D0`/`+0x1DC`) install 14 objects (slots 3–19, per `sub_1015C9C0`); slots 12/20/21 are
-   **not** among them, so their rules come from the wildcard-mode install path (not yet located). The
-   claim/reward side exists in `AscScrollOfFortune.cpp`.
-3. **Temporal contracts type-vector fill** — `AscTemporalContracts.cpp`. Documented; empty-shape stands.
-   Suggestion: re-check with the object-family technique that cracked the CA rules (look for a static
-   object table over the manager before assuming the VM).
-4. **`AscJson.cpp` map writer** — returns nothing, documented. Lead: the sibling
-   `LoadAscensionContentJSON` reads `<client dir>\Content\<name>.json`; the manager's writer may be the
-   same file path from the archives (candidate, unverified — needs a live check of the original).
+2. **Scroll-of-Fortune accounting for unlearn slots 12/20/21** — **resolved 2026-10-11 (see the update
+   block)**: the wildcard install path is the `mode & 4` block of `sub_1015C9C0` (full gate table in
+   `re\out\A2-WILDCARD-INSTALL-FOUND.md`) and the recon's masks match it. The unlearn vectors never
+   receive rule objects at indices 12/14/15/20/21 in any mode, so the rule BODIES for unlearn
+   slots 12 (NO_SCROLL_OF_FORTUNE) and 20 (SCROLL_OF_FORTUNE_LIMIT) are the only unlocated piece
+   (they cannot be array objects; suspect the `+548` challenge family, slot 12 = obj BBDC, ok
+   `0x1015A4B0`, undecoded).
+3. **Temporal contracts type-vector fill** — **CLOSED 2026-10-11**: no writer exists in the deployed
+   image (ctor/zeroing + readers only); the empty shape is faithful (`a-items-closure`).
+4. **`AscJson.cpp` map writer** — **CLOSED 2026-10-11**: the JSONContentMgr has no writer and no
+   reader anywhere (ctor + DllMain + dtor; not the VM); `DecodeJSONContent` returning nothing is
+   faithful (`a-items-closure`).
 5. **`AscModelMethods.cpp` missile tick** — resolved by design: the module drives the tick with its own
    16 ms timer (the VM drives it in the original); the note stands.
 6. **`AscProfiler.cpp` formatter** — closed as won't-transcribe: unreachable by construction (no
@@ -66,15 +92,12 @@ remains the fallback.)
 
 ### B. Measurement sessions needed
 
-7. **Callback-list orders for the non-five lists.** The five documented lists are handled (Before71E930 /
-   After80B5D0 captured; Before724820 / EffectFilter / VisualHide fixed on `callback-order-measured` +
-   `aura-callback6-mentor`). The other 23 lifecycle lists still append in call-site order
-   (`AscRuntime.cpp`: OnStockEvent, OnAfter403340, OnLeaveWorld, OnBefore528F00, OnAfter6E7F50,
-   OnBefore4943C0, OnAfterAddSpell, OnAfter402910, OnAfter5204C0, OnAfter4F6F90, OnAfter495810,
-   OnEnterWorld, OnGlueScreen, OnAfterEnterWorld, OnObjectFree, OnAlternate6DF050, OnGameObjectUse,
-   OnItemUse, OnAfter743EC0, OnBeforeTargetChange, OnAfter52A980, OnAfterTargetChange, OnBefore6ECF80).
-   Closing needs another live walk (method + two-session protocol in `docs/CALLBACK-ORDER-MEASURED.md`,
-   "Measurement and validation").
+7. **Callback-list orders for the non-five lists** — **DONE 2026-10-11 for the eleven multi-registrant
+   lists** (`callback-order-all-lists`, `9b7a60b`; measured live, pinned at the reference load base;
+   modules pass ranks; 3849 checks). Remaining: **GlueScreen's 45 registrants** stay call-site-ordered
+   (complete walk data captured; the per-module attribution of 45 callbacks is the last mapping job)
+   and the single-entry lists (After5204C0, Before/AfterTargetChange's one-sided pairs, After52A980,
+   AfterAddSpell, Before4943C0, Before6ECF80, After743EC0, ObjectFree-adjacent…) are order-trivial.
 8. **`+0x274` record** — **identified 2026-10-11**: build byte 628 is the flag the unlearn rule runner
    (`sub_10151820`) branches on — `*(build+628) == 0` selects the direct path, else the map-resolved
    one (the `+0x254`-style map with the FNV hash). The session reset clears it. Modelling stays a
