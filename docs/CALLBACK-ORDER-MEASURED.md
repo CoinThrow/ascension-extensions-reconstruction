@@ -8,7 +8,7 @@ sites — and one original-only callback on the aura-application list has no cal
 
 | list (native object) | order |
 | --- | --- |
-| `0x10BE2B6C` aura application (before `0x724820`) | `AscAura137::BeforeApply`, `AscSpellVisuals::BeforeAuraApply`, `AscSpellMods::AuraFlagOn`, `AscAppearance::BeforeAuraApply`, `AscSpawnVisibility::BeforeAuraApply`, *+ one original-only callback (below)* |
+| `0x10BE2B6C` aura application (before `0x724820`) | `AscAura137::BeforeApply`, `AscSpellVisuals::BeforeAuraApply`, `AscSpellMods::AuraFlagOn`, `AscAppearance::BeforeAuraApply`, `AscSpawnVisibility::BeforeAuraApply`, *+ the original-only callback (reconstructed below)* |
 | `0x10BE2D78` effect filtering (`0x744AC0` replacement) | `AscSpellVisuals::RemoveEffect`, `AscQuestSpellHide::RemoveEffect` |
 | `0x10BE2D98` visual hiding | `AscSpellVisuals::HideVisual`, `AscQuestSpellHide::HideVisual` |
 
@@ -21,9 +21,10 @@ although their sites are the other way round.
 
 - Runs **last of six** (`AscSpawnVisibility`'s entry precedes it). The list count for `0x10BE2B6C` is 6.
 - Registered through the original's runtime layer: no static registration site exists anywhere in the
-  image; its address is only materialized at runtime (a VM lane cell, `.vm_sec` + `0xD70088`). It is not
-  reconstructed; `InsertByCapturedOrder`'s *unknown callbacks follow the captured entries* rule
-  reproduces its position.
+  image; its address is only materialized at runtime (a VM lane cell, `.vm_sec` + `0xD70088`).
+  **Reconstructed 2026-10-10** as `AscAccount::MentorAuraGate` (`src/Ascension/AscAccount.cpp`,
+  original function `0x10A4D550`), registered with a non-captured site so `InsertByCapturedOrder`'s
+  *unknown callbacks follow the captured entries* rule places it exactly where the original calls it.
 - Behaviour — a spell veto called as `(unit, a, rec)`; `false` suppresses the aura application
   (the detour returns without calling the original `0x724820`):
 

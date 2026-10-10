@@ -5,6 +5,7 @@
 // (+0x30), str class (+0x34), str race (+0x4C), str faction (+0x64). +0x0E ("is GM") comes from SMSG 0x5C0.
 #include <Ascension/AscAccount.hpp>
 #include <Ascension/AscBindings.hpp>
+#include <Ascension/AscRuntime.hpp>
 #include <Ascension/AscScript.hpp>
 #include <Ascension/RealmInfo.hpp>
 #include <Client/CDataStore.hpp>
@@ -122,10 +123,53 @@ namespace
         PatchByte(0x50D2B7, &jmp, 1);
     }
 
+    // The original-only sixth entry of the aura-application list (0x10BE2B6C). The original registers
+    // it from its runtime layer (a VM lane cell, no static site) and calls it last. Behaviour
+    // byte-verified from the live original (2026-10-09/10): a staff/spectator gate for five custom
+    // aura spells on PLAYER units -- Mentor (0x79BB0, 0x79C3F), the Ascension-logo overhead icon
+    // (0x79BC5), New Player Help/Newcomer (0x79C40) and Returning Player (0x978960). Return false =
+    // veto: the application stops and the aura is skipped. GM (+0x0E) and the GM PLAYER_FLAGS bit (8)
+    // are allow paths, the developer flag (0x8000) suppresses, and the paired tags never apply to
+    // the active player itself.
+    bool __cdecl MentorAuraGate(void* unit, uint32_t, uint32_t rec)
+    {
+        if (!unit || !rec)
+            return true;
+        auto* u = static_cast<uint8_t*>(unit);
+        if (*reinterpret_cast<const uint32_t*>(u + 0x14) != 4)   // interposes only on players
+            return true;
+        const uint32_t spell = *reinterpret_cast<const uint32_t*>(rec);
+        const auto* desc = *reinterpret_cast<const uint32_t* const*>(u + 8);
+        const uint32_t flags = desc[0x258 / 4];                  // PLAYER_FLAGS
+        const auto activePlayer = [] { return reinterpret_cast<uint8_t*(__cdecl*)()>(0x4038F0)(); };
+        switch (spell)
+        {
+        case 0x79BB0:   // Mentor
+        case 0x79C3F:
+            if (u == activePlayer())                    return false;
+            if (flags & 0x8000)                         return false;
+            if (!(flags & 8) && !g_account.newcomer)    return false;
+            return g_account.gm == 0;
+        case 0x79BC5:   // Overhead Icon - Ascension Logo
+            return !(flags & 0x8000);
+        case 0x79C40:   // New Player Help - Newcomer
+        case 0x978960:  // Returning Player
+            if (u == activePlayer())                    return false;
+            if (flags & 0x8000)                         return false;
+            if (!(flags & 8) && !g_account.guide)       return false;
+            return g_account.gm == 0;
+        default:
+            return true;
+        }
+    }
+
     void Init()
     {
         sDC.AddPacketHandler(0x5C0, CNetClientCustomPacket((void*)&OnGMStatus, nullptr));
         sDC.AddPacketHandler(0x9BB, CNetClientCustomPacket((void*)&OnAccountInfo, nullptr));
+        // Site 0 is not a captured site, so the registrar ranks it after the five captured entries --
+        // the measured position of the original's runtime-registered sixth callback.
+        AscRuntime::OnBefore724820(&MentorAuraGate, 0);
     }
 
     const AscBindings::Binding kBindings[] = {

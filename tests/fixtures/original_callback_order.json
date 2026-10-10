@@ -5,7 +5,7 @@
   "hash": "FNV-1a over four little-endian relocated callback-pointer bytes",
   "bucket_mask": 7,
   "method": "Offline x86 startup emulation for Before71E930 / After80B5D0: follow head->next nodes to head, reading callback at node+8; closed list count verified. Before724820 / EffectFilter / VisualHide additionally measured from live list traversal in two independent game sessions of a sibling build; addresses translated with per-band deltas validated against both emulated lists.",
-  "limits": "Before71E930 and After80B5D0 are complete for this image. Before724820 carries one original-only callback (runtime-registered, no static call site, not reconstructed) that runs after the five captured entries. Remaining lists are unmeasured.",
+  "limits": "Before71E930 and After80B5D0 are complete for this image. Before724820 carries one original-only callback (runtime-registered, no static call site; reconstructed 2026-10-10 as AscAccount::MentorAuraGate, called last) that runs after the five captured entries. Remaining lists are unmeasured.",
   "Before71E930": {
     "object": "0x10be2b8c",
     "callbacks": [
@@ -30,7 +30,7 @@
       {"name": "AscAppearance::BeforeAuraApply", "function": "0x100c6410", "site": "0x100c5b88"},
       {"name": "AscSpawnVisibility::BeforeAuraApply", "function": "0x101a1fa0", "site": "0x101a2025"},
       {"name": "(original-only, not reconstructed)", "function": null, "site": null,
-       "note": "Called last. Registered by the original's runtime layer, no static registration site."}
+       "note": "Called last. Registered by the original's runtime layer, no static registration site. Original function 0x10a4d550; reconstructed 2026-10-10 in AscAccount.cpp (Mentor / Newcomer / Returning Player / overhead-icon gate)."}
     ]
   },
   "EffectFilter": {
