@@ -6,6 +6,10 @@
 // TokenCost +0x20, vector<u32> quest groups +0x24, MinimumLevel +0x30, str display name +0x34, str
 // content type +0x4C. The code that fills the type vector sits in the VM-protected part of the DLL
 // and is not recoverable, so the list stays empty here and every reader returns its empty shape.
+// (2026-10-10 re-check against the deployed build: the manager constant 0x10D3C1F0 and its fill
+// sites have no reference anywhere in the plain code of the image -- every use lives inside the
+// Themida-mutated region, whose operands the VM transforms, so no static recovery is possible.
+// The empty-shape behaviour here is the deliberate stand-in for that code.)
 //
 // Module init FUN_10339120: the library, glue reset FUN_10337120 (types and queue cleared),
 // TEMPORAL_CONTRACTS_UPDATED, enter-world FUN_1033b820 (a 50 ms timer, 0x403370, that sends one
