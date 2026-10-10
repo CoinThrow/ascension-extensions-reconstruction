@@ -3,6 +3,12 @@
 *Result of the per-task pipeline that closed nine gaps and the deep re-audit that followed. Each item
 states what it is, why it is still open, and what would close it. Branch names refer to this repository.*
 
+*Update 2026-10-11 (completion pass): everything completable without a live game session is done —
+fork fix committed and pushed; the scaffold-gate audit closed (all five sites verified as the
+original's, `audit-step3-scope` updated); crash-reporter provenance tracked in
+`THIRD_PARTY_NOTICES.md`; the `+0x274` record investigated (refined note below). What remains needs
+VM-bytecode decode or a live measurement session; the product decisions stay deliberate.*
+
 ## Closed in this pipeline (each its own branch, ready for review)
 
 | branch | what it does |
@@ -12,9 +18,10 @@ states what it is, why it is still open, and what would close it. Branch names r
 | `temporal-contracts-status` | records the confirmed VM-side un-recoverability of the contract-type fill with the byte-search evidence |
 | `ca-layout-columns` | retires the superseded partial `GetAllEntries` pair (never bound; the live `AscCAMgr` FUN_1016f5b0 + PushEntry path already emits every column) |
 | `aura-callback6-mentor` | reconstructs the original-only sixth aura-application callback (Mentor / Newcomer / Returning Player / overhead icon) in `AscAccount.cpp`; callback-order test: 3367 checks, 0 failures |
-| `audit-step3-scope` | scopes the remaining scaffold plumbing (custom opcode dispatch + glue CVars) |
+| `audit-step3-scope` | scopes and **closes** the remaining scaffold plumbing — audit (2026-10-11): all five sites and both bodies verify as the original's own |
 | `docs-improvements-md` | adds `IMPROVEMENTS.md`, the defect log the code comments promise |
 | `stale-notes-cleanup` | fixes the verified-stale notes (AscPatchData hand-work list, AscGameMode manager note, AscWildcardRolls header, DLL_REFERENCE mirror) |
+| `third-party-notices` | adds `THIRD_PARTY_NOTICES.md` (crash-reporter GPL-2 lineage + vendored freetype/mapbox/nlohmann licenses) |
 | `remaining-work-analysis` | this file |
 
 ## Still open — by category
@@ -41,12 +48,20 @@ or intercept the live VM with the campaign's hardware-breakpoint tooling at the 
 
 ### B. Measurement sessions needed
 
-7. **Callback-list orders still unmeasured.** The fixture's own limits say Before71E930 / After80B5D0
-   are complete, Before724820 / EffectFilter / VisualHide are measured, and *the remaining lists are
-   unmeasured* — those still order by call site (`AscRuntime.hpp`). Closing needs another live walk of
-   the original's list objects (the campaign's tooling + the two-session protocol).
-8. **`AscWildcardRapid.hpp` `+0x274` record** — "not modelled here" in the session-reset note; needs a
-   decompile pass to decide whether it carries behaviour beyond the phase reset.
+7. **Callback-list orders for the non-five lists.** The five documented lists are handled (Before71E930 /
+   After80B5D0 captured; Before724820 / EffectFilter / VisualHide fixed on `callback-order-measured` +
+   `aura-callback6-mentor`). The other 23 lifecycle lists still append in call-site order
+   (`AscRuntime.cpp`: OnStockEvent, OnAfter403340, OnLeaveWorld, OnBefore528F00, OnAfter6E7F50,
+   OnBefore4943C0, OnAfterAddSpell, OnAfter402910, OnAfter5204C0, OnAfter4F6F90, OnAfter495810,
+   OnEnterWorld, OnGlueScreen, OnAfterEnterWorld, OnObjectFree, OnAlternate6DF050, OnGameObjectUse,
+   OnItemUse, OnAfter743EC0, OnBeforeTargetChange, OnAfter52A980, OnAfterTargetChange, OnBefore6ECF80).
+   Closing needs another live walk (method + two-session protocol in `docs/CALLBACK-ORDER-MEASURED.md`,
+   "Measurement and validation").
+8. **`AscWildcardRapid.hpp` `+0x274` record** — "not modelled here" in the session-reset note.
+   Investigated 2026-10-11: the recon's `FUN_10a33b10` / `FUN_10a33c90` labels resolve into one merged
+   IDA chunk (`0x10A33990`-`0x10A33CE7`) whose visible code is the unlearn-result / roll-send path; the
+   `+0x274` write was not located in the quick pass. Needs a dedicated decompile with block-splitting
+   (the recon's FUN labels elsewhere are block entries, not function starts).
 
 ### C. Product decisions (deliberate, keep separate from fidelity)
 
@@ -59,18 +74,19 @@ or intercept the live VM with the campaign's hardware-breakpoint tooling at the 
 
 ### D. Housekeeping / legal
 
-12. **Crash-reporter provenance** — `AscCrashReport.cpp` descends from TrinityCore's GPL-2
-    `WheatyExceptionReport`; the repository is MIT. Resolve before redistribution (flag lives in
-    `IMPROVEMENTS.md`).
-13. **Scaffold config gates** — `CUSTOMPACKETS_PATCH` / `GLUEMGREXTENSION`: audit the five addresses in
-    `AUDIT-STEP3-SCOPE.md`, then fold the gates out.
+12. **Crash-reporter provenance** — **tracked 2026-10-11**: `THIRD_PARTY_NOTICES.md` now records the
+    GPL-2 lineage of `AscCrashReport.cpp` (plus the vendored freetype / mapbox / nlohmann licenses);
+    resolution before any redistribution remains a legal decision, but the flag now has its home.
+13. **Scaffold config gates** — **closed 2026-10-11**: the audit ran; all five addresses are the
+    original's own patch sites and the detour bodies transpose the original's (evidence in
+    `AUDIT-STEP3-SCOPE.md`, "Audit results"). The options stay as ordinary config toggles.
 
 ### E. Fork side (`azerothcore-wotlk-coa`)
 
-14. **`AuthSession.cpp` session-key fix is uncommitted** on `feature/ascension-native-login` (+18 lines:
-    persist `_ascensionKeySession` as `account.session_key` for the world handoff, with
-    `LOGIN_UPD_LOGONPROOF`). Commit it before PR review; without it the world handoff fails after
-    custom auth.
+14. **`AuthSession.cpp` session-key fix** — **done 2026-10-11**: committed `2b14991ad` on
+    `feature/ascension-native-login` (persist `_ascensionKeySession` as `account.session_key` for the
+    world handoff, with `LOGIN_UPD_LOGONPROOF`) and pushed to `CoinThrow/azerothcore-wotlk-coa`. The
+    branch is now PR-able.
 
 ## Suggested review order
 
