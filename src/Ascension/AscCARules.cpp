@@ -11,10 +11,13 @@
 // Which slots a build gets depends on FUN_10157450's flags: 1 normal, 2 draft, 4 wildcard (1 only when
 // neither), | 8 when qualities are on. A named build then loses slots 8, 16 and 19 (FUN_10150a80).
 //
-// Dependencies not transcribed yet, and what the original does without their data:
-//   slot 18 BUILD_CREATOR  FUN_10101370 / FUN_100fd750 (C_BuildCreator templates): no template -> fail.
-//   slot 20 NO_TALENTS_CHALLENGE  FUN_1013b8b0 / FUN_1013b350 (C_Challenge rules): no challenge -> ok.
+// Dependencies, and what the original does without their data:
+//   slot 18 BUILD_CREATOR  FUN_10101370 / FUN_100fd750 (C_BuildCreator templates): the original consults the
+//           build creator's draft<->template relation, which is not mapped yet -- none -> fail (as before).
+//   slot 20 NO_TALENTS_CHALLENGE  FUN_1013b8b0 / FUN_1013b350 (C_Challenge rules): wired below through
+//           AscChallenge::ActiveHasRule(CHALLENGE_RULES_TYPE_NO_TALENTS = kChallengeRules[14]); no challenge -> ok.
 #include <Ascension/AscCAMgr.hpp>
+#include <Ascension/AscChallenge.hpp>
 #include <Ascension/AscConfig.hpp>
 #include <Ascension/AscDbc.hpp>
 #include <Ascension/AscGameMode.hpp>
@@ -220,7 +223,7 @@ namespace
         case 17: return !(flags & 1);                                        // FUN_10160ee0 DEPRECATED
         case 18:                                                             // FUN_10160df0 BUILD_CREATOR
             if ((b.specDraft || b.u64 || b.u65) && (b.u65 || RowU32(r, 0x74) != 1))
-                return false;   // the template (C_BuildCreator) is not transcribed: none is found
+                return false;   // the build creator's template relation is not mapped: none is found
             return true;
         case 21: return QualityOk(b, r, 2, "UNCOMMON", 8);                   // FUN_10163ed0
         case 22: return QualityOk(b, r, 3, "RARE", 8);                       // FUN_10163b90
@@ -344,7 +347,9 @@ namespace
             return true;
         }
         case 20:                                                             // FUN_101619b0 NO_TALENTS_CHALLENGE
-            return true;   // needs an active challenge with rule 14; C_Challenge holds none until transcribed
+            // FUN_1013b8b0 / FUN_1013b350: rejects while an active challenge's level carries the
+            // CHALLENGE_RULES_TYPE_NO_TALENTS rule (kChallengeRules[14]); without a challenge -> ok.
+            return !AscChallenge::ActiveHasRule(14);
         case 30:                                                             // FUN_101634c0 NOT_WHILE_DEAD
             return !reinterpret_cast<bool(__thiscall*)(void*)>(0x6DAC10)(const_cast<uint8_t*>(unit));
         case 31:                                                             // FUN_10164430 WILDCARD_NOT_IN_COMBAT
@@ -1055,7 +1060,7 @@ namespace
         }
         default:
             // 12 NO_SCROLL_OF_FORTUNE / 20 SCROLL_OF_FORTUNE_LIMIT (wildcard only) count Scroll of Fortune
-            // items through a manager not transcribed yet; slot 21 fails every wildcard unlearn regardless.
+            // items through the scroll accounting path not transcribed yet; slot 21 fails every wildcard unlearn regardless.
             return true;
         }
     }
