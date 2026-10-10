@@ -8,3 +8,5 @@ out/
 *.exp
 *.ilk
 *.obj
+__pycache__/
+*.pyc
