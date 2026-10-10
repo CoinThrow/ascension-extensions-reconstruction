@@ -489,6 +489,7 @@ namespace
         AscRuntime::Signal("WILDCARD_UNLEARN_ABILITY_RESULT", "%s", result.c_str());
         const bool consumed = AscWildcardRapid::OnUnlearnResult(result);
         const bool pending = AscWildcardRapid::TakeRerollPending();
+        AscCA::ClearRequests();   // the answer retires the tracked learn/unlearn request
         if (!consumed && pending && result == "CA_UNLEARN_OK")
             Packet(0x643).U32(0).U32(0).U32(0).U8(0).Send();
     }
@@ -513,6 +514,7 @@ namespace
         g_rollReady = false;
         g_pollUntil = 0;
         AscWildcardRapid::TakeRerollPending();
+        AscCA::ClearRequests();   // the reset drops the outstanding request too
         for (const Reveal& r : g_reveals)
             AscRuntime::Cancel(r.timer, RevealDone, reinterpret_cast<void*>(static_cast<uintptr_t>(r.entry)));
         g_reveals.clear();

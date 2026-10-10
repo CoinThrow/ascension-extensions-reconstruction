@@ -197,6 +197,13 @@ namespace AscCA
     Build* PendingBuild();     // mgr +0x24, nullptr when none
     void ResetPendingBuild();  // FUN_10173d00
 
+    // FUN_10a315d0 +0x198: learn/unlearn requests sent and not yet answered ({id, ...}).
+    // The original's fill site is in its apply flow; mirrored at the transcribed CMSG 0x61D sends and
+    // cleared when SMSG 0x61E consumes the outstanding flag or the world-entry reset drops the state.
+    // Consumers: AscCAMgr's InFlight (IsPendingEntryID) and the pending-build signal wait.
+    void TrackRequest(uint32_t id);
+    void ClearRequests();
+
     // FUN_101498d0: the first entry (class-allowed rows sort first) listing this spell, or nullptr.
     Row RowBySpell(uint32_t spellId);
     bool IsCASpell(uint32_t spellId);              // FUN_101497c0: the spell is some CA entry's (0x10bdd540)

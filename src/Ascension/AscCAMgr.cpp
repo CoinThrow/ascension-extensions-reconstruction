@@ -611,7 +611,9 @@ namespace
     std::map<uint8_t, uint32_t> g_credits;   // 0x10bded78 (FUN_101a1c90), category -> amount
 
     // FUN_10a315d0 +0x198: learn/unlearn requests sent and not yet answered ({id, ..., rank at +0xC}).
-    // Only the apply flow fills it, so it stays empty until that lands.
+    // The original's fill site is in its apply flow; mirrored at the transcribed CMSG 0x61D sends
+    // (AscCA::TrackRequest) and cleared when SMSG 0x61E consumes the outstanding flag or the
+    // world-entry reset drops the state.
     struct Request { uint32_t id = 0, u4 = 0, u8 = 0, rank = 0; };
     std::vector<Request> g_requests;
 
@@ -1016,6 +1018,19 @@ Build* ActiveBuild()
 }
 
 Build* PendingBuild() { return g_mgr.pending; }
+
+// See AscCAMgr.hpp. Only `id` is read by the transcribed consumers; the original's other fields
+// (u4 / u8 / rank) stay zero until the apply flow that fills them is reconstructed.
+void TrackRequest(uint32_t id)
+{
+    for (const Request& r : g_requests)
+        if (r.id == id)
+            return;
+    Request req;
+    req.id = id;
+    g_requests.push_back(req);
+}
+void ClearRequests() { g_requests.clear(); }
 
 void RequestAutoLearn() { g_mgr.autoLearn = true; }
 
@@ -3782,7 +3797,10 @@ namespace
             return 1;
         }
         for (uint32_t id : ids)
+        {
             Packet(0x61D).U32(id).Send();
+            TrackRequest(id);   // +0x198: sent, not yet answered
+        }
         // FUN_10a31760 re-arms the mode manager's roll-ready poll; FUN_10a2f910 flags the unlearn as
         // outstanding until SMSG 0x61E.
         AscWildcardRolls::ArmPoll();

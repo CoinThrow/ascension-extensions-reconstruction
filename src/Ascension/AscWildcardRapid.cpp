@@ -332,6 +332,7 @@ namespace
                     AscWildcardSets::DesiredForRoll(s.ids, s.tags);
                     g_session = s;   // FUN_10a327e0
                     Packet(0x61D).U32(g_session.target).Send();
+                    AscCA::TrackRequest(g_session.target);   // +0x198: sent, not yet answered
                     AscWildcardRolls::ArmPoll();   // FUN_10a31760
                     AscRuntime::Signal("WILDCARD_RAPID_ROLL_STATE_CHANGED");
                     return {true, std::string()};
@@ -465,6 +466,7 @@ namespace
         if (!ReadNumber(L, id))
             return 0;
         Packet(0x61D).U32(id).Send();
+        AscCA::TrackRequest(id);   // +0x198: sent, not yet answered
         PushBool(L, true);
         return 1;
     }
