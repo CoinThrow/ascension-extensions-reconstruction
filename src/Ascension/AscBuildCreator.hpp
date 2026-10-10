@@ -11,6 +11,12 @@ namespace AscBuildCreator
     // FUN_100fd750 + what FUN_1014f0f0 reads from the entry: false when no known build has this id.
     bool SeedOfBuild(const std::string& id, AscCA::BuildSeed& out);
 
+    // Slot 18's template path (the rule object off_10BCCB40's ok(), sub_10160bc0): find the entry with
+    // this id (sub_100fd850: category page, then the queried list), rebuild the template build from it
+    // at `level` (sub_1014eec0 with its prepare flag), and report whether it holds more than
+    // `currentRank` ranks of `rowId` -- false when there is no template, or it does not.
+    bool TemplateRankCheck(const std::string& id, uint32_t rowId, uint32_t level, uint32_t currentRank);
+
     // The link codec, for C_CharacterAdvancement.ImportPendingBuild: FUN_1010f5e0 (URL decode) and
     // FUN_10109ba0 (base64 + raw inflate); and FUN_101001e0 into a scratch entry, as a CA seed.
     std::string UrlDecode(const std::string& in);

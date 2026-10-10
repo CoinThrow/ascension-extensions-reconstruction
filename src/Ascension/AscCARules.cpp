@@ -11,11 +11,20 @@
 // Which slots a build gets depends on FUN_10157450's flags: 1 normal, 2 draft, 4 wildcard (1 only when
 // neither), | 8 when qualities are on. A named build then loses slots 8, 16 and 19 (FUN_10150a80).
 //
-// Dependencies, and what the original does without their data:
-//   slot 18 BUILD_CREATOR  FUN_10101370 / FUN_100fd750 (C_BuildCreator templates): the original consults the
-//           build creator's draft<->template relation, which is not mapped yet -- none -> fail (as before).
-//   slot 20 NO_TALENTS_CHALLENGE  FUN_1013b8b0 / FUN_1013b350 (C_Challenge rules): wired below through
-//           AscChallenge::ActiveHasRule(CHALLENGE_RULES_TYPE_NO_TALENTS = kChallengeRules[14]); no challenge -> ok.
+// Slots whose data dependencies were once missing, rebuilt from the rule objects themselves (2026-10-11).
+// The rules are polymorphic objects (vtable = dtor/applies/ok); each slot's object sits in a static
+// family (off_10BCCAF0..off_10BCCBFC) installed by sub_1015C9C0, and every ok() is plain code:
+//   slot 18 BUILD_CREATOR  off_10BCCB40's ok() = sub_10160bc0: outside the early passes (all of specDraft
+//           +0x1A, u64 +0x64, u65 +0x65 clear -- or u65 clear with group 1) a draft must match a build
+//           creator template by name (sub_100fd850: category page, then the queried list) and the row must
+//           hold at least one more rank in the template than in the build (sub_1014eec0 rebuilds the
+//           template from the entry at the build's level; sub_101526f0 reads both ranks). No template ->
+//           fail. Wired below through AscBuildCreator::TemplateRankCheck.
+//   slot 20 NO_TALENTS_CHALLENGE  off_10BCCB48's ok() = sub_10161780: talent rows only (sub_101c6c80
+//           classifies the type string as "Talent"), the active player's own unit only, rejects while an
+//           active challenge's level carries CHALLENGE_RULES_TYPE_NO_TALENTS (sub_1013b8b0 /
+//           sub_1013b350(challenge, 14)); no challenge -> ok.
+#include <Ascension/AscBuildCreator.hpp>
 #include <Ascension/AscCAMgr.hpp>
 #include <Ascension/AscChallenge.hpp>
 #include <Ascension/AscConfig.hpp>
@@ -221,9 +230,12 @@ namespace
             return true;
         case 15: return RowVisible(r);                                       // FUN_10164620 WRONG_REALM
         case 17: return !(flags & 1);                                        // FUN_10160ee0 DEPRECATED
-        case 18:                                                             // FUN_10160df0 BUILD_CREATOR
+        case 18:                                                             // sub_10160bc0 (rule object off_10BCCB40)
+            // Passes outright unless the build is a draft (specDraft, u64 or u65) outside the
+            // u65-clear/group-1 case; otherwise the draft needs a build-creator template named like the
+            // build that holds at least one more rank of the row than the build already does.
             if ((b.specDraft || b.u64 || b.u65) && (b.u65 || RowU32(r, 0x74) != 1))
-                return false;   // the build creator's template relation is not mapped: none is found
+                return AscBuildCreator::TemplateRankCheck(b.name, RowU32(r, 0), b.level, b.RankOf(RowU32(r, 0)));
             return true;
         case 21: return QualityOk(b, r, 2, "UNCOMMON", 8);                   // FUN_10163ed0
         case 22: return QualityOk(b, r, 3, "RARE", 8);                       // FUN_10163b90
@@ -346,9 +358,14 @@ namespace
             }
             return true;
         }
-        case 20:                                                             // FUN_101619b0 NO_TALENTS_CHALLENGE
-            // FUN_1013b8b0 / FUN_1013b350: rejects while an active challenge's level carries the
-            // CHALLENGE_RULES_TYPE_NO_TALENTS rule (kChallengeRules[14]); without a challenge -> ok.
+        case 20:                                                             // sub_10161780 (rule object off_10BCCB48)
+            // Only talent rows are gated at all (sub_101c6c80 classifies the type string as "Talent"),
+            // then only on the active player's own unit; the query itself is sub_1013b8b0 /
+            // sub_1013b350(challenge, 14): reject while an active challenge carries the rule.
+            if (RowType(r) != 2)
+                return true;
+            if (!unit || UnitGuid(unit) != ActivePlayerGuid())
+                return true;
             return !AscChallenge::ActiveHasRule(14);
         case 30:                                                             // FUN_101634c0 NOT_WHILE_DEAD
             return !reinterpret_cast<bool(__thiscall*)(void*)>(0x6DAC10)(const_cast<uint8_t*>(unit));

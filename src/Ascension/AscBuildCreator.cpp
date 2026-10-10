@@ -2542,6 +2542,18 @@ bool SeedOfBuild(const std::string& id, AscCA::BuildSeed& out)
     return true;
 }
 
+// The slot-18 rule's template path (sub_10160bc0): sub_100fd850 finds the template entry, sub_1014eec0
+// rebuilds the template build from it at `level` (a4 = 1: the prepare pass), then the row must hold one
+// more rank in the template than in the build (sub_101526f0 reads both sides' ranks).
+bool TemplateRankCheck(const std::string& id, uint32_t rowId, uint32_t level, uint32_t currentRank)
+{
+    const Entry* entry = FindBuild(id);
+    if (!entry)
+        return false;
+    AscCA::Build temp(SeedOf(*entry), level, true);
+    return temp.RankOf(rowId) >= currentRank + 1;
+}
+
 bool SpecHasActiveBuild(int spec)
 {
     return spec >= 0 && static_cast<size_t>(spec) < g.specs.size() && !g.specs[spec].id.empty();
