@@ -4,8 +4,10 @@
 // Manager: +0x04 an unordered_map, +0x24 vector of contract types (100 bytes each), +0x30..+0x40 a
 // deque of pending activations. Type: str Name +0, u32 RemainingCompletions +0x18, MoneyCost +0x1C,
 // TokenCost +0x20, vector<u32> quest groups +0x24, MinimumLevel +0x30, str display name +0x34, str
-// content type +0x4C. The code that fills the type vector sits in the VM-protected part of the DLL
-// and is not recoverable, so the list stays empty here and every reader returns its empty shape.
+// content type +0x4C. The deployed image never fills the type vector (2026-10-11): the manager
+// static (0x10D3F238)'s vector (+0x24) has only its constructor/zeroing sites and readers; every
+// other reference to the manager is a reader or the glue reset. So the list is empty in every
+// observable state and every reader returns its empty shape, faithfully.
 //
 // Module init FUN_10339120: the library, glue reset FUN_10337120 (types and queue cleared),
 // TEMPORAL_CONTRACTS_UPDATED, enter-world FUN_1033b820 (a 50 ms timer, 0x403370, that sends one

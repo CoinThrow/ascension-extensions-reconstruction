@@ -13,8 +13,12 @@
 //   DecodeJSON(text): json::parse (exceptions on, no comments) inside a catch-all -> the table
 //     FUN_100a4580 builds, or nothing.
 //   DecodeJSONContent(name): JSONContentMgr (0x10BE2FA8) name -> json, cached as a registry ref of
-//     the table built in the client's main Lua state (0x817DB0). Nothing in the plain code fills the
-//     map (its only writer is in the VM-protected region), so this returns nothing.
+//     the table built in the client's main Lua state (0x817DB0). The map is never populated in this
+//     build (2026-10-11): the deployed image's only references to the manager (deployed 0x10BE5FA0 --
+//     ctor sub_1028DF70, mutex 0x10BE5FA4, both hash containers) are its constructor, the DllMain
+//     static blocks and its destructor; there is no setter anywhere, plain or in the VM (the four
+//     virtualized functions are teardown paths and the wildcard query, all unrelated). So this
+//     returns nothing, faithfully.
 //   LoadAscensionContentJSON(name): the text of <client dir (0x4218B0)>\Content\<name>.json, "" when
 //     missing.
 //
