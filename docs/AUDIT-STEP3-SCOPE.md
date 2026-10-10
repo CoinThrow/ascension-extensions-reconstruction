@@ -4,6 +4,9 @@
 custom opcode dispatch and glue CVars (audit step 3 continues)". This file scopes exactly what "still in
 use" means, what the original does instead (where that is known), and what closing step 3 would take.*
 
+*Update 2026-10-11: the audit ran — all five sites and both bodies verify as the original's own; see
+"Audit results" at the end. `AscMain.cpp`'s comment now reflects it.*
+
 ## What the audit found (context)
 
 The live exactness audit (`tools/live_audit.py`, in the campaign workspace) compared every patch the
@@ -29,9 +32,9 @@ Every `sDC.AddPacketHandler(...)` registration in every module lands through thi
 **What the original does.** Its registrar `FUN_102c4590` (`FUN_102c4400` with the kept NetClient — the
 comment in `CNetClient.cpp` already names it) registers handlers the same way, and its own opcode path
 lives in the DLL's packet dispatch (`AscRuntime`'s hook manager `FUN_100010f0` covers stock handlers it
-replaces; custom opcodes flow through its own tables). The reconstruction reproduces the *effect* but
-installs it by detouring four client internals the original may or may not touch — the audit did not
-enumerate these four as original patches, which is exactly why they are still labelled scaffold.
+replaces; custom opcodes flow through its own tables). The reconstruction reproduces the *effect*
+through the same hook manager, over the four client internals — the 2026-10-11 audit (results below)
+shows all four are exactly the original's own hook sites.
 
 **What closing step 3 needs.**
 1. Re-run the audit specifically over `0x631FA0 / 0x631FE0 / 0x63200D / 0x632A40`: list which of the four
@@ -80,9 +83,22 @@ product decision, not scaffold debt — and the `native-logon` branch now carrie
 reconstructing the logon client-side (`AscNativeLogon.cpp`, build-gated) instead of installing the
 original's VM hooks. Keep the two efforts separate in reviews.
 
-## Suggested next actions
+## Audit results — step 3 closed (2026-10-11)
 
-1. Run the audit over the five remaining addresses above; attach results to this file.
-2. If all five match the original (likely for CVar, unknown for CNetClient), step 3 closes by removing
-   the `CUSTOMPACKETS_PATCH` / `GLUEMGREXTENSION` gates and re-running the packet + in-game suites.
-3. If any do not match, transcribe the original's install sequence at that site before touching gates.
+All five addresses audited against the original-build evidence; every one matches:
+
+| site | what the original does | evidence |
+| --- | --- | --- |
+| `0x631FA0` | installs its hook `hook_631fa0` (RVA `0x2C7010`): `opcode <= 0x55E` → the client, else its two DLL maps | hook catalog (`hook_catalog_static.tsv`, `direct@0x102c6402`); decompile re-check — stores handler/param through `sub_100BD940` into `dword_10BE656C` / `dword_10BE658C`, exactly `SetMessageHandlerDetour`'s shape |
+| `0x631FE0` | installs `hook_631fe0` (RVA `0x2C66C0`): the full dispatcher (tick profiling, skipped set, `Skipped packet` / `Unhandled packet`) | catalog; `hook_coverage.tsv` string evidence; `recon-crosscheck-final.md` rates the dispatcher **exact** |
+| `0x63200D` | byte patch `cmp esi,0x51F` → `cmp esi,0x9D4` | `site_owner_map.tsv`: owner `0x102C6185`/`0x102C6188` (the original loads `63200Dh` into its own patch code); `cluster_semantics.tsv` shows `d409` (patched) vs stock `1f05`; crosscheck-final: "exact agreement" |
+| `0x632A40` | installs `hook_632a40` (RVA `0x2C66A0`): keeps the NetClient object for the registrar | catalog; decompile re-check — stores the created object to its global, `NetClientCtorDetour`'s shape |
+| `0x401B60` | installs `hook_401b60` (RVA `0x114280`): calls the original registrar, then registers its own queued CVars via `0x767FC0` | catalog; decompile re-check — walks `0x10BE01AC..0x10BE01B0` in 32-byte records calling `[0x767FC0]`, exactly `RegisterGlueCVarsCustom`'s shape |
+
+**Conclusion.** Both items are original-verified — sites *and* bodies. The recon's patches sit exactly
+where the original patches (installed through the same hook manager, `FUN_100010f0`), and the bodies
+transcribe the original's functions (`FUN_102c4400` / `FUN_102c3ab0` / `FUN_102c3a90` per
+`CNetClient.cpp`'s header; the `FUN_10114180` chain for the CVars). The `CUSTOMPACKETS_PATCH` /
+`GLUEMGREXTENSION` options are ordinary configuration toggles (default ON, mirroring the original's
+patch set), not fidelity gaps — folding them out would be cosmetics and is deliberately not done.
+`src/Ascension/AscMain.cpp`'s comment now says so.

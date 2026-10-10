@@ -19,7 +19,11 @@ namespace AscWidget { void ApplyPatches(); }
 // The real DLL's single export; the exe never calls it but tooling looks for it.
 extern "C" __declspec(dllexport) int ClientExtensionsDummy() { return 1; }
 
-// The scaffold plumbing still in use: custom opcode dispatch and glue CVars (audit step 3 continues). Lua
+// Custom opcode dispatch and glue CVars: original-verified set (audit step 3 closed 2026-10-11). Both
+// patches sit exactly where the original patches -- 0x631FA0/0x631FE0/0x63200D/0x632A40 are its
+// hook_631fa0 / hook_631fe0 / bound patch / hook_632a40, and 0x401B60 is its hook_401b60 -- and the
+// bodies transcribe the original's (FUN_102c4400 / FUN_102c3ab0 / FUN_102c3a90, and the FUN_10114180
+// chain for the CVars). See docs/AUDIT-STEP3-SCOPE.md. Lua
 // registration is the original's 0x855060 detour (AscRegistry) and events its 0x81B5F0 detour (AscRuntime), so
 // the scaffold's CGlueMgr / CustomLua / FrameScript call-site hooks (0x4DA71D, 0x52AB17, 0x52AB26) are gone, as
 // are its 0xD415B8 / 0xD415BC range writes (the original disables that check by stubbing 0x86B5A0, AscAttachLate).
