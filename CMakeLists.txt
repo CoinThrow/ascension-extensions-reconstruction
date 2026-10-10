@@ -33,6 +33,15 @@ option(ACTIONBAR_LUA "" OFF)
 option(DEVHELPER_LUA "" OFF)
 option(GLUEMGREXTENSION "Glue-stage Lua function registration" ON)
 
+# --- Ascension native logon (our reconstruction; not upstream) ------------------------------------
+# Installs the original DLL's three logon hooks (client hello builder 0x8CCE00, key-material copy
+# 0x9A83E0, 20-byte proof check 0x9A88C0) plus the four exe length-gate patches, replacing the
+# client's native SRP6 handshake with Ascension's X25519/ChaCha20/HMAC-SHA256 scheme. OFF by
+# default: only a server that speaks the same protocol (the collaborator's fork) can answer it.
+# See src/Ascension/AscNativeLogon.cpp for the protocol, provenance and self-test.
+option(ASCENSION_NATIVE_LOGON "Install the reconstructed Ascension native logon hooks (server must speak the protocol)" OFF)
+set(ASCENSION_NATIVE_LOGON_SERVER_KEY "1a03d4c71f289f39046fad519f8af3e92b793709a8a340e492b4ff5ff55e1537" CACHE STRING "Server X25519 public key (hex, 64 chars) used by ASCENSION_NATIVE_LOGON")
+
 set(UP ${CMAKE_CURRENT_SOURCE_DIR}/WotLKExtensions)
 configure_file(${UP}/cmake/PatchConfig.hpp.in ${CMAKE_BINARY_DIR}/gen/PatchConfig.hpp)
 

@@ -27,3 +27,7 @@
 #cmakedefine01 ACTIONBAR_LUA
 #cmakedefine01 DEVHELPER_LUA
 #cmakedefine01 GLUEMGREXTENSION
+
+// Ascension native logon (see src/Ascension/AscNativeLogon.cpp)
+#cmakedefine01 ASCENSION_NATIVE_LOGON
+#cmakedefine ASCENSION_NATIVE_LOGON_SERVER_KEY "@ASCENSION_NATIVE_LOGON_SERVER_KEY@"
