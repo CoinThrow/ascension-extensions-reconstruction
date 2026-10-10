@@ -9,11 +9,18 @@ original's, `audit-step3-scope` updated); crash-reporter provenance tracked in
 `THIRD_PARTY_NOTICES.md`; the `+0x274` record investigated (refined note below). What remains needs
 VM-bytecode decode or a live measurement session; the product decisions stay deliberate.*
 
+*Update 2026-10-11 (VM deep dive): the CA rule system was NOT VM-blocked — it is a static family of
+polymorphic rule objects (`off_10BCCAF0..off_10BCCBFC`, installed by `sub_1015C9C0`) whose `ok()`
+functions are plain code. Slot 18 is now fully rebuilt and slot 20 refined (branch
+`ca-rules-dependencies`, `3d79d9c`); the `+0x274` byte is identified (the unlearn runner's path
+selector). Scroll slots 12/20 are absent from the located installer (wildcard path to find); A3/A4
+keep their notes with better routes.*
+
 ## Closed in this pipeline (each its own branch, ready for review)
 
 | branch | what it does |
 | --- | --- |
-| `ca-rules-dependencies` | wires CA rule slot 20 (NO_TALENTS_CHALLENGE) through `AscChallenge::ActiveHasRule` — "rule 14" is `CHALLENGE_RULES_TYPE_NO_TALENTS`; refreshes the slot-18 dependency notes |
+| `ca-rules-dependencies` | CA rules from the original rule objects: slot 20 wired + refined (talent-only, active-player-only), **slot 18 rebuilt** (`TemplateRankCheck`) — 2026-10-11 deep dive |
 | `ca-pending-request-flow` | fills the manager `+0x198` request vector at the transcribed CMSG 0x61D sends and clears it on SMSG 0x61E / reset, so `InFlight`, `IsPendingEntryID` and the pending-build signal wait actually wait |
 | `temporal-contracts-status` | records the confirmed VM-side un-recoverability of the contract-type fill with the byte-search evidence |
 | `ca-layout-columns` | retires the superseded partial `GetAllEntries` pair (never bound; the live `AscCAMgr` FUN_1016f5b0 + PushEntry path already emits every column) |
@@ -32,19 +39,30 @@ The constants and bodies below are referenced only from the Themida-mutated regi
 byte-search across the deployed image finds no plain-code reference of any encoding (verified
 2026-10-10: `0x10BDCDF0`, `0x1015B7C0`, `0x10D3C1F0`, `0x10BE2B6C`, `0x10BE28AC` → 0 hits).
 
-1. **CA rule slot 18 (BUILD_CREATOR template relation)** — `AscCARules.cpp`. `AscBuildCreator` is
-   transcribed; the draft↔template relation the original check consults is not mapped. The current
-   "none → fail" emulation stays until the relation is recovered.
-2. **Scroll-of-Fortune accounting for unlearn slots 12/20/21** — `AscCARules.cpp` ~1058. The item
-   counting path the original uses is not transcribed (the claim/reward side exists in
-   `AscScrollOfFortune.cpp`; the counting side does not).
+1. **CA rule slot 18 (BUILD_CREATOR template relation)** — **fixed 2026-10-11**: rules decoded via the
+   static rule-object family; slot 18's `ok()` = `sub_10160bc0` (template match by name; row must hold
+   ≥ current rank + 1 ranks in it) — wired through `AscBuildCreator::TemplateRankCheck`
+   (`ca-rules-dependencies`, `3d79d9c`). Slot 20 refined in the same commit (talent-only,
+   active-player-only).
+2. **Scroll-of-Fortune accounting for unlearn slots 12/20/21** — narrowed 2026-10-11: the unlearn rule
+   arrays (`+0x1D0`/`+0x1DC`) install 14 objects (slots 3–19, per `sub_1015C9C0`); slots 12/20/21 are
+   **not** among them, so their rules come from the wildcard-mode install path (not yet located). The
+   claim/reward side exists in `AscScrollOfFortune.cpp`.
 3. **Temporal contracts type-vector fill** — `AscTemporalContracts.cpp`. Documented; empty-shape stands.
-4. **`AscJson.cpp` map writer** (its only writer is in the VM region) — returns nothing, documented.
-5. **`AscModelMethods.cpp` missile tick** (no plain-code caller) — documented.
-6. **`AscProfiler.cpp` formatter** (3.7 KB, unreachable in plain code) — documented.
+   Suggestion: re-check with the object-family technique that cracked the CA rules (look for a static
+   object table over the manager before assuming the VM).
+4. **`AscJson.cpp` map writer** — returns nothing, documented. Lead: the sibling
+   `LoadAscensionContentJSON` reads `<client dir>\Content\<name>.json`; the manager's writer may be the
+   same file path from the archives (candidate, unverified — needs a live check of the original).
+5. **`AscModelMethods.cpp` missile tick** — resolved by design: the module drives the tick with its own
+   16 ms timer (the VM drives it in the original); the note stands.
+6. **`AscProfiler.cpp` formatter** — closed as won't-transcribe: unreachable by construction (no
+   caller in the original either); the module note stands.
 
-*What would close the group:* decode the `.vm_sec` bytecode (see the campaign's `VM-FULL-ANALYSIS.md`);
-or intercept the live VM with the campaign's hardware-breakpoint tooling at the fill sites.
+*What would close the group:* case-by-case — the 2026-10-11 deep dive cracked the CA rules with no
+VM work at all (static rule-object family); try the same static-object route per item before assuming
+VM. (The genuine VM set = the four virtualized functions, `VM-FULL-ANALYSIS.md`; live interception
+remains the fallback.)
 
 ### B. Measurement sessions needed
 
@@ -57,11 +75,10 @@ or intercept the live VM with the campaign's hardware-breakpoint tooling at the 
    OnItemUse, OnAfter743EC0, OnBeforeTargetChange, OnAfter52A980, OnAfterTargetChange, OnBefore6ECF80).
    Closing needs another live walk (method + two-session protocol in `docs/CALLBACK-ORDER-MEASURED.md`,
    "Measurement and validation").
-8. **`AscWildcardRapid.hpp` `+0x274` record** — "not modelled here" in the session-reset note.
-   Investigated 2026-10-11: the recon's `FUN_10a33b10` / `FUN_10a33c90` labels resolve into one merged
-   IDA chunk (`0x10A33990`-`0x10A33CE7`) whose visible code is the unlearn-result / roll-send path; the
-   `+0x274` write was not located in the quick pass. Needs a dedicated decompile with block-splitting
-   (the recon's FUN labels elsewhere are block entries, not function starts).
+8. **`+0x274` record** — **identified 2026-10-11**: build byte 628 is the flag the unlearn rule runner
+   (`sub_10151820`) branches on — `*(build+628) == 0` selects the direct path, else the map-resolved
+   one (the `+0x254`-style map with the FNV hash). The session reset clears it. Modelling stays a
+   choice (the recon hand-implements slots rather than the generic runner).
 
 ### C. Product decisions (deliberate, keep separate from fidelity)
 
