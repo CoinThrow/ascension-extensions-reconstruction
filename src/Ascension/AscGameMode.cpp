@@ -297,7 +297,7 @@ uint32_t ActiveMask() { return g_mask; }
 bool SpecBuildDraft(int spec) { return static_cast<uint32_t>(spec) < 20 && (g_specs[spec].flags & 1) != 0; }   // FUN_1031efd0
 void OnModeChanged(void (*cb)()) { g_modeListeners.push_back(cb); }
 
-// FUN_1016f580: the player's record in the CharacterAdvancement manager (0x10bde440), +0x14. That
-// manager is not transcribed yet; until it is, there is no record, which the original reports as -1.
+// FUN_1016f580: the player's record in the CharacterAdvancement manager (0x10bde440), +0x14; -1 when
+// there is no record. The manager is AscCAMgr's transcribed state (AscCA::ActiveSpecIndex).
 int ActiveSpecIndex() { return AscCA::ActiveSpecIndex(); }   // FUN_1016f580
 }

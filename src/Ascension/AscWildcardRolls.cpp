@@ -1,6 +1,6 @@
 // C_Wildcard, part 1: WildcardModeMgr (FUN_10a315d0, static 0x10D3D0D8) -- spent-roll repurchasing and
-// the roll / reset / starting-choice gates. The desired/undesired filters and rapid rolling (the
-// WildcardMgr, FUN_10a349d0) are still AscWildcard.cpp's older inferred code; see HANDOFF.
+// the roll / reset / starting-choice gates. The desired/undesired lists live in AscWildcardSets.cpp
+// (part 2) and rapid rolling in AscWildcardRapid.cpp (part 4).
 //
 // WildcardModeMgr, per spec (index FUN_1016f580, up to 20):
 //   +0x08 / +0x58   two server counters (0x6EE / 0x6EF)

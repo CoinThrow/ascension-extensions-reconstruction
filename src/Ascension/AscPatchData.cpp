@@ -6,15 +6,16 @@
 //   0x68C MANASTORM_PLAYER_GROUP_MODIFIERS FUN_102a3ff0                              0x14
 //   0x68D MANASTORM_MODIFIERS      FUN_102a3e60                                      0x3C
 //   0x693 ITEM_APPEARANCES         handler_0x0693, then refreshes the appearance managers
-//                                  (FUN_1020fc80, FUN_101b5660) -- hook them in via the after-
-//                                  callback when the appearance collection is transcribed.
+//                                  (FUN_1020fc80, FUN_101b5660) -- hooked through
+//                                  AscAppearance_ItemAppearancesPatched (AscAppearance.cpp).
 //   0x579..0x57B LFG_*           struct image + u32-length strings (AscDbcPatch::RegisterSized)
 //   0x686 SPELL_ADDON              FUN_101e36b0 (0x5C): an existing row is overwritten in place and
 //                                  nothing else happens; a new row is upserted and ALSO indexed by
 //                                  its +4 (the spell) through FUN_101da400 -- AscPatchData_SpellAddonForSpell().
-// Still hand-work in this family: 0x567 creature (store), 0x56A item display collections, 0x56B
-// mystic enchant, 0x573 vanity, 0x574 spell affect,
-// 0x591 challenge, 0x692 appearances. (0x680 zone light: AscZoneLight.)
+// Every former hand-work item now has its module: 0x567 creature + 0x574 spell affect
+// (AscBridgeStore), 0x56A item display collections (AscItemCollections), 0x56B mystic enchant
+// (AscMysticEnchant), 0x573 vanity (AscVanityCollection), 0x591 challenge (AscChallenge),
+// 0x692 appearances (this file, below). (0x680 zone light: AscZoneLight.)
 #include <Ascension/AscBindings.hpp>
 #include <Ascension/AscCAMgr.hpp>
 #include <Ascension/AscCrashContext.hpp>
