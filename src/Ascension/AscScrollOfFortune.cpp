@@ -15,6 +15,7 @@
 #include <Ascension/AscBindings.hpp>
 #include <Ascension/AscRuntime.hpp>
 #include <Ascension/AscScript.hpp>
+#include <Ascension/AscScrollOfFortune.hpp>
 #include <Client/CDataStore.hpp>
 #include <Client/CNetClient.hpp>
 #include <Misc/DataContainer.hpp>
@@ -458,4 +459,13 @@ namespace
         {"C_WildcardRewards", "GetLevelingInfo", GetLevelingInfo},
     };
     AscBindings::Module s_module(kBindings, sizeof(kBindings) / sizeof(kBindings[0]), &Init);
+}
+
+// FUN_10a3af80: the tier's 28-byte limits record (g_sof.limits, SMSG 0x6b8) or null.
+const uint32_t* AscScrollOfFortune::LimitRecord(uint32_t tier)
+{
+    for (const Limit& l : g_sof.limits)
+        if (l.tier == tier)
+            return &l.tier;
+    return nullptr;
 }

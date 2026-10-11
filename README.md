@@ -40,6 +40,11 @@ The portable regression in `tests/native_ca_packets.py` compiles the production 
 against client API doubles. It covers initial state, listener timing, subsequent updates, new preset slots
 and missing local units. It does not launch the game or replace the 32-bit Windows DLL build.
 
+`tests/native_unlearn_scroll.py` compiles the wildcard unlearn rules (`CA_UNLEARN` slots 12
+NO_SCROLL_OF_FORTUNE and 20 SCROLL_OF_FORTUNE_LIMIT with their starting-allowance and roll-fit helpers)
+against client doubles. It covers the tier's scroll-token families, the SMSG 0x6b8 cap/used records and
+every early-out (starting allowance, other units, missing builds and records).
+
 `tests/native_callback_order.py` exercises the production cast and aura-removal registrars and detours
 against the original DLL's measured linked-list traversal, including registration permutations and vetoes.
 The original uses MSVC `unordered_set` callbacks: cast checks run aura requirements, stack requirements,

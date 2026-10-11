@@ -31,6 +31,8 @@
 #include <Ascension/AscDbc.hpp>
 #include <Ascension/AscGameMode.hpp>
 #include <Ascension/AscScript.hpp>
+#include <Ascension/AscScrollOfFortune.hpp>
+#include <Ascension/AscToken.hpp>
 #include <Ascension/RealmInfo.hpp>
 #include <algorithm>
 #include <cstring>
@@ -904,6 +906,11 @@ bool Build::ValidateAll(bool inOrder, const std::vector<uint32_t>& include, std:
 }
 
 // ---- unlearn rules (FUN_10151a50) ---------------------------------------------------------------------
+// The wildcard helpers (FUN_1015c500 / FUN_1015c5f0 / FUN_1015c6e0 / FUN_1015c7d0 / FUN_1015c8c0) install
+// five extra rules from objects 0x10BCCC1C..0x2C: unit 12 NO_SCROLL_OF_FORTUNE, unit 20
+// SCROLL_OF_FORTUNE_LIMIT, build 21 NOT_WILDCARD (always fails: in wildcard mode an ability comes off
+// through the scroll path, not this one), build 14 / 15 WILDCARD_UNSPENT_AE / TE, whose applies() is
+// FUN_10165490's CONFIG_WILDCARD_SCROLL_OF_FORTUNE_ALLOW_UNLEARN_WITH_UNSPENT_ESSENCE check.
 namespace
 {
     // Items and money on the active player (FUN_10308700 / FUN_10308570 / FUN_103087a0): stacks of
@@ -970,6 +977,22 @@ namespace
         return c.money && HasMoney(unit, c.money);
     }
 
+    // FUN_10155450: inside the starting allowance -- a wildcard build whose starting-roll count is
+    // still within CONFIG_WILDCARD_STARTING_ABILITY_COUNT (default 4).
+    bool StartingAllowance(const Build& b)
+    {
+        return b.wildcard != 0 && b.u44 <= ConfigInt("CONFIG_WILDCARD_STARTING_ABILITY_COUNT", 4);
+    }
+
+    // FUN_10154ef0 / FUN_10154f30: one more roll of this kind still fits under the essence budget.
+    bool OneMoreRollFits(const Build& b, bool talent)
+    {
+        const uint32_t cost = ConfigInt(talent ? "CONFIG_WILDCARD_TALENT_ROLL_COST" : "CONFIG_WILDCARD_ABILITY_ROLL_COST", talent ? 1 : 2);
+        const uint32_t spent = talent ? b.GlobalTE(0) : b.GlobalAE(0);
+        const uint32_t budget = talent ? b.TEBudget(b.level) : b.AEBudget(b.level);
+        return (budget > spent ? budget - spent : 0) >= cost;
+    }
+
     bool UnlearnBuildRuleOk(uint32_t slot, Build& b, Row r)
     {
         const uint32_t id = RowU32(r, 0), flags = RowU32(r, 0x124);
@@ -1007,18 +1030,15 @@ namespace
                             return false;
             return true;
         case 13: return !b.LockedOf(id);                                     // FUN_10164aa0 LOCKED
-        case 14:                                                             // FUN_10165670 WILDCARD_UNSPENT_AE
-        case 15:                                                             // FUN_101657d0 WILDCARD_UNSPENT_TE
+        case 14:                                                             // FUN_10165440 WILDCARD_UNSPENT_AE
+        case 15:                                                             // FUN_101655a0 WILDCARD_UNSPENT_TE
         {
-            if ((b.u44 & 0xFF) && b.GlobalTE(0) == 0)
+            if (StartingAllowance(b) && b.GlobalTE(0) == 0)
                 return true;
             const bool ae = slot == 14;
             if (!(ae ? IsAbilityLike(r) : IsTalent(r)))
                 return true;
-            // FUN_10155120 / FUN_10155160: one more roll still fits the budget.
-            const uint32_t spent = ae ? b.GlobalAE(0) + ConfigInt("CONFIG_WILDCARD_ABILITY_ROLL_COST", 2)
-                                      : b.GlobalTE(0) + ConfigInt("CONFIG_WILDCARD_TALENT_ROLL_COST", 1);
-            return !(spent <= (ae ? b.AEBudget(b.level) : b.TEBudget(b.level)));
+            return !OneMoreRollFits(b, !ae);                                 // FUN_10154ef0 / FUN_10154f30
         }
         case 16:                                                             // FUN_101649b0 BUILD_CREATOR
             if ((b.specDraft || b.u64 || b.u65) && (b.u65 || RowU32(r, 0x74) != 1))
@@ -1028,7 +1048,7 @@ namespace
             // FUN_10164e80 / 10165180 / 10165000 revalidate a FRESH default build (FUN_1014f820), which is
             // empty, so FUN_10158050 succeeds at once -- the original's slots never fail.
             return true;
-        case 21: return false;                                               // FUN_100cc240 NOT_WILDCARD
+        case 21: return false;                                               // FUN_100cc330 NOT_WILDCARD
         default: return true;
         }
     }
@@ -1075,10 +1095,58 @@ namespace
             Build* b = BuildOf(UnitGuid(unit));
             return b && CanPay(unit, UnlearnCost(*b, r));
         }
-        default:
-            // 12 NO_SCROLL_OF_FORTUNE / 20 SCROLL_OF_FORTUNE_LIMIT (wildcard only) count Scroll of Fortune
-            // items through the scroll accounting path not transcribed yet; slot 21 fails every wildcard unlearn regardless.
-            return true;
+        case 12:                                                             // FUN_10164ab0 NO_SCROLL_OF_FORTUNE
+        {
+            // The active build tier's Scroll of Fortune: ability rows need <tier>_ABILITIES (token id
+            // +20), talent rows <tier>_TALENTS (+40), anything else the plain token -- FUN_10a32940 /
+            // FUN_10a32d40 / FUN_10a32b80 over the record's active spec (FUN_1016f340). Inside the
+            // starting allowance no scroll is needed; another unit's unlearn never fails here.
+            Build* b = BuildOf(UnitGuid(unit));
+            if (!b)
+                return false;
+            if (StartingAllowance(*b))
+                return true;
+            if (UnitGuid(unit) != ActivePlayerGuid())
+                return true;
+            const uint32_t tier = static_cast<uint32_t>(ActiveSpecIndex());
+            if (IsAbilityLike(r) && AscToken::Amount64(tier + 20) >= 1)
+                return true;
+            if (IsTalent(r) && AscToken::Amount64(tier + 40) >= 1)
+                return true;
+            return AscToken::Amount64(tier) >= 1;
+        }
+        case 20:                                                             // FUN_10165260 SCROLL_OF_FORTUNE_LIMIT
+        {
+            // The tier's limit record (SMSG 0x6b8's +0x58 list, FUN_10a3af80): caps {ability v0, talent
+            // v1, plain v2} with used {v3, v4, v5}. The rule fails when the matching cap is reached
+            // (used >= cap >= 0, FUN_10165230's test) while one more roll would still fit (FUN_10154ef0 /
+            // FUN_10154f30); holding no scroll of the kind passes, as do non-ability / non-talent rows
+            // and other units.
+            Build* b = BuildOf(UnitGuid(unit));
+            if (!b)
+                return true;
+            if (StartingAllowance(*b))
+                return true;
+            const bool ability = IsAbilityLike(r);
+            if (!ability && !IsTalent(r))
+                return true;
+            if (UnitGuid(unit) != ActivePlayerGuid())
+                return true;
+            const uint32_t tier = static_cast<uint32_t>(ActiveSpecIndex());
+            const bool haveFamily = AscToken::Amount64(tier + (ability ? 20 : 40)) >= 1;
+            const bool havePlain = AscToken::Amount64(tier) >= 1;
+            if (!haveFamily && !havePlain)
+                return true;
+            const bool fits = OneMoreRollFits(*b, !ability);
+            const uint32_t* lim = AscScrollOfFortune::LimitRecord(tier);
+            auto reached = [&](uint32_t cap, uint32_t used) {
+                return fits && lim && static_cast<int32_t>(cap) >= 0 && used >= cap;
+            };
+            if (haveFamily && !reached(lim ? lim[ability ? 1 : 2] : 0, lim ? lim[ability ? 4 : 5] : 0))
+                return true;
+            return havePlain ? !reached(lim ? lim[3] : 0, lim ? lim[6] : 0) : false;
+        }
+        default: return true;
         }
     }
 
