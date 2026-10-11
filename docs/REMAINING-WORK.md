@@ -36,14 +36,35 @@ and the callback-order work is done for the multi-registrant lists.*
   (Branch `a-items-closure`, `fbdde94`; VM residual 5's JSONContentMgr item closed in
   `VM-FULL-ANALYSIS.md`.)
 - **Drop-in**: a branch build booted the live client to a stable 40 s+ session (smoke test); the
-  game folder was restored to the user's own recon build afterwards.*
+  game folder was restored to the user's own recon build afterwards.
+
+*Update 2026-10-11 (close-out): both remaining unknowns are closed.*
+- **Unlearn slots 12/20 decoded and implemented** (`ca-unlearn-scroll-rules`, `cfafc22`): the unlearn
+  vectors 12/14/15/20/21 are guarded by seven per-slot gate helpers (objects at `0x10BCCC1C..0x10BCCC34`;
+  ok bodies `10164AB0` (12), `10165260` (20), `10165440/90` (14), `101655A0` (15), `100CC330` (21)) —
+  wildcard starting allowance (`wildcard != 0 && u44 <= CONFIG_WILDCARD_STARTING_ABILITY_COUNT`, default 4),
+  roll-budget fit (`OneMoreRollFits` over `CONFIG_WILDCARD_ABILITY_ROLL_COST` / `TALENT_ROLL_COST`, defaults
+  2/1), token checks (`AscToken::Amount64(tier / tier+20 / tier+40)`) and the Scroll-of-Fortune limit record
+  (the SMSG `0x6b8` +0x58 list; caps vs used per family). Wired in `AscCARules.cpp` (cases 12/20/14/15/21 +
+  `StartingAllowance` / `OneMoreRollFits`); new `tests/native_unlearn_scroll.py` (23 checks) and
+  `AscScrollOfFortune::LimitRecord`. Evidence: `re\out\A2-WILDCARD-INSTALL-FOUND.md` (corrected).
+- **GlueScreen's 45 registrants ranked** (`callback-order-glue`, `348c3a2`): the `0x10BE5868` ring walked
+  at donor_full1 base `0x66950000` (46 raw slots, cross-checked against donor_full2); the 45 recon
+  registrations pass pinned compact ranks. Two originals split into two recon callbacks each
+  (`0x1016EA30` CA store, `0x10A32510` wildcard resets), raw slot 14 (`0x100FC170`) merges into
+  `AscCAFilter::ResetOnGlue`, and raw slots 33 (`0x100D3700`, LFG-boss reset) / 39 (`0x101A1E50`,
+  CA-gossip reset) have no recon registration (recorded original-only in the fixture — two small optional
+  follow-ups). `native_callback_order.py`: 4329 checks, 0 failures (GlueScreen permutation run over the
+  pinned ranks).*
 
 ## Closed in this pipeline (each its own branch, ready for review)
 
 | branch | what it does |
 | --- | --- |
 | `ca-rules-dependencies` | CA rules from the original rule objects: slot 20 wired + refined (talent-only, active-player-only), **slot 18 rebuilt** (`TemplateRankCheck`) — 2026-10-11 deep dive |
+| `ca-unlearn-scroll-rules` | **unlearn slots 12/20/14/15/21 decoded and implemented** (wildcard starting allowance, roll-budget fit, token checks, Scroll-of-Fortune limit record); new `native_unlearn_scroll.py` (23 checks) — 2026-10-11 close-out |
 | `callback-order-all-lists` | **measured ranks for the eleven multi-registrant lifecycle lists** (`InsertRanked`); fixture + tests extended (3849 checks) — 2026-10-11 final deep dive |
+| `callback-order-glue` | **GlueScreen's 45 registrants ranked** (46-slot raw ring at donor_full1 0x66950000; two same-slot splits, one merge, two original-only leaves); `native_callback_order.py` GlueScreen permutation run (4329 checks) — 2026-10-11 close-out |
 | `a-items-closure` | A3/A4 closed with deployed-image xref evidence (no writers exist; vestigial subsystems) — 2026-10-11 |
 | `ca-pending-request-flow` | fills the manager `+0x198` request vector at the transcribed CMSG 0x61D sends and clears it on SMSG 0x61E / reset, so `InFlight`, `IsPendingEntryID` and the pending-build signal wait actually wait |
 | `temporal-contracts-status` | records the confirmed VM-side un-recoverability of the contract-type fill with the byte-search evidence |
@@ -68,13 +89,11 @@ byte-search across the deployed image finds no plain-code reference of any encod
    ≥ current rank + 1 ranks in it) — wired through `AscBuildCreator::TemplateRankCheck`
    (`ca-rules-dependencies`, `3d79d9c`). Slot 20 refined in the same commit (talent-only,
    active-player-only).
-2. **Scroll-of-Fortune accounting for unlearn slots 12/20/21** — **resolved 2026-10-11 (see the update
-   block)**: the wildcard install path is the `mode & 4` block of `sub_1015C9C0` (full gate table in
-   `re\out\A2-WILDCARD-INSTALL-FOUND.md`) and the recon's masks match it. The unlearn vectors never
-   receive rule objects at indices 12/14/15/20/21 in any mode, so the rule BODIES for unlearn
-   slots 12 (NO_SCROLL_OF_FORTUNE) and 20 (SCROLL_OF_FORTUNE_LIMIT) are the only unlocated piece
-   (they cannot be array objects; suspect the `+548` challenge family, slot 12 = obj BBDC, ok
-   `0x1015A4B0`, undecoded).
+2. **Scroll-of-Fortune accounting for unlearn slots 12/20/21** — **CLOSED 2026-10-11**
+   (`ca-unlearn-scroll-rules`, `cfafc22`): the unlearn rule bodies were located as seven per-slot gate
+   helpers (see the close-out update block) and are implemented in `AscCARules.cpp` with tests. The
+   wildcard install path is the `mode & 4` block of `sub_1015C9C0` (full gate table in
+   `re\out\A2-WILDCARD-INSTALL-FOUND.md`).
 3. **Temporal contracts type-vector fill** — **CLOSED 2026-10-11**: no writer exists in the deployed
    image (ctor/zeroing + readers only); the empty shape is faithful (`a-items-closure`).
 4. **`AscJson.cpp` map writer** — **CLOSED 2026-10-11**: the JSONContentMgr has no writer and no
@@ -92,11 +111,12 @@ remains the fallback.)
 
 ### B. Measurement sessions needed
 
-7. **Callback-list orders for the non-five lists** — **DONE 2026-10-11 for the eleven multi-registrant
-   lists** (`callback-order-all-lists`, `9b7a60b`; measured live, pinned at the reference load base;
-   modules pass ranks; 3849 checks). Remaining: **GlueScreen's 45 registrants** stay call-site-ordered
-   (complete walk data captured; the per-module attribution of 45 callbacks is the last mapping job)
-   and the single-entry lists (After5204C0, Before/AfterTargetChange's one-sided pairs, After52A980,
+7. **Callback-list orders for the non-five lists** — **DONE 2026-10-11**: the eleven multi-registrant
+   lists (`callback-order-all-lists`, `9b7a60b`; measured live, pinned at the reference load base;
+   modules pass ranks; 3849 checks) and **GlueScreen's 45 registrants** (`callback-order-glue`,
+   `348c3a2`; pinned at donor_full1 `0x66950000`; 4329 checks; see the close-out update block — two
+   original-only leaves, `0x100D3700` and `0x101A1E50`, remain unimplemented as optional follow-ups).
+   The single-entry lists (After5204C0, Before/AfterTargetChange's one-sided pairs, After52A980,
    AfterAddSpell, Before4943C0, Before6ECF80, After743EC0, ObjectFree-adjacent…) are order-trivial.
 8. **`+0x274` record** — **identified 2026-10-11**: build byte 628 is the flag the unlearn rule runner
    (`sub_10151820`) branches on — `*(build+628) == 0` selects the direct path, else the map-resolved
