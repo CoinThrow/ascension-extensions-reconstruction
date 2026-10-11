@@ -2341,27 +2341,52 @@ namespace
         return k;
     }
 
-    // FUN_100f36c0 / FUN_100f3d70 (FrameScript::lua_totable): {[number] = boolean} in lua_next order;
-    // anything else logs and yields an empty map.
-    std::vector<uint32_t> TrueKeys(lua_State* L, int idx)
+    const char* const kBuildFilters[48] = {"FILTER_NONE", "FILTER_FEATURED", "FILTER_DIFFICULTY_RATING_EASY",
+        "FILTER_DIFFICULTY_RATING_NORMAL", "FILTER_DIFFICULTY_RATING_HARD", "FILTER_DIFFICULTY_RATING_VERY_HARD",
+        "FILTER_DIFFICULTY_RATING_IMPOSSIBLE", "FILTER_OWNED_BUILDS", "FILTER_PRIMARY_STAT_STRENGTH",
+        "FILTER_PRIMARY_STAT_AGILITY", "FILTER_PRIMARY_STAT_INTELLECT", "FILTER_PRIMARY_STAT_SPIRIT",
+        "FILTER_ROLE_TANK", "FILTER_ROLE_HEALER", "FILTER_ROLE_DAMAGE", "FILTER_LAST_30_DAYS",
+        "FILTER_CLASS_WARRIOR", "FILTER_CLASS_PALADIN", "FILTER_CLASS_HUNTER", "FILTER_CLASS_ROGUE",
+        "FILTER_CLASS_PRIEST", "FILTER_CLASS_DEATH_KNIGHT", "FILTER_CLASS_SHAMAN", "FILTER_CLASS_MAGE",
+        "FILTER_CLASS_WARLOCK", "FILTER_CLASS_HERO", "FILTER_CLASS_DRUID", "FILTER_CLASS_BARBARIAN",
+        "FILTER_CLASS_WITCH_DOCTOR", "FILTER_CLASS_DEMON_HUNTER", "FILTER_CLASS_WITCH_HUNTER",
+        "FILTER_CLASS_STORMBRINGER", "FILTER_CLASS_KNIGHT_OF_XOROTH", "FILTER_CLASS_GUARDIAN", "FILTER_CLASS_MONK",
+        "FILTER_CLASS_SON_OF_ARUGAL", "FILTER_CLASS_RANGER", "FILTER_CLASS_CHRONOMANCER",
+        "FILTER_CLASS_NECROMANCER", "FILTER_CLASS_PYROMANCER", "FILTER_CLASS_CULTIST", "FILTER_CLASS_STARCALLER",
+        "FILTER_CLASS_SUN_CLERIC", "FILTER_CLASS_TINKER", "FILTER_CLASS_VENOMANCER", "FILTER_CLASS_REAPER",
+        "FILTER_CLASS_PRIMALIST", "FILTER_CLASS_RUNEMASTER"};                                  // 0x10B1F780
+    const char* const kBuildSorts[5] = {"SORT_NONE", "SORT_RATING_ASCENDING", "SORT_RATING_DESCENDING",
+        "SORT_DATE_ASCENDING", "SORT_DATE_DESCENDING"};                                        // 0x10B1E854
+
+    // FUN_100f36c0 / FUN_100f3d70 (FrameScript::lua_totable into an enum -> bool map): string keys
+    // through FUN_100f5470 / FUN_100f56a0 (an unknown one logs and becomes 0), nil / boolean / number
+    // values, the last write winning. A bad key or value logs and yields an empty map.
+    template <size_t N>
+    std::vector<uint32_t> TrueKeys(lua_State* L, int idx, const char* const (&names)[N])
     {
         std::unordered_map<uint32_t, bool> map;
         AscLua::lua_pushnil(L);
         while (AscLua::lua_next(L, idx))
         {
-            if (AscLua::lua_type(L, -2) != NUMBER)
+            if (!AscLua::lua_isstring(L, -2))
             {
                 AscLog::Printf("FrameScript::lua_totable Invalid lua key type");
                 AscLua::lua_settop(L, -3);
                 return {};
             }
-            if (AscLua::lua_type(L, -1) != BOOLEAN)
+            const int vt = AscLua::lua_type(L, -1);
+            if (vt != NIL && vt != BOOLEAN && vt != NUMBER)
             {
-                AscLog::Printf("FrameScript::lua_totable type");
+                AscLog::Printf("FrameScript::lua_totable Invalid lua value type");
                 AscLua::lua_settop(L, -3);
                 return {};
             }
-            map.emplace(static_cast<uint32_t>(ToInt(AscLua::lua_tonumber(L, -2))), AscLua::lua_toboolean(L, -1) != 0);
+            const bool value = AscLua::lua_toboolean(L, -1) != 0;
+            const std::string key = AscLua::lua_tolstring(L, -2, nullptr);
+            uint32_t id = 0;
+            if (!EnumIndex(names, key, id))
+                AscLog::Printf("lua_tovalue<enum>: Unknown string '%s'", key.c_str());
+            map[id] = value;
             AscLua::lua_settop(L, -2);
         }
         // UpdateFilter walks the map: MSVC's unordered_map, same FNV hash and bucket policy and the same
@@ -2415,8 +2440,8 @@ namespace
         if (!ValidateInput(L, {STRING, TABLE, TABLE}))   // FUN_100e9a50
             return 0;
         const std::string text = CheckString(L, 1);
-        const std::vector<uint32_t> args = TrueKeys(L, 2);
-        const std::vector<uint32_t> sorts = TrueKeys(L, 3);
+        const std::vector<uint32_t> args = TrueKeys(L, 2, kBuildFilters);
+        const std::vector<uint32_t> sorts = TrueKeys(L, 3, kBuildSorts);
         g_filter.ApplyFilter(text, args, sorts);
         return 0;
     }
