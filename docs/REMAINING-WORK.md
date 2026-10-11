@@ -55,7 +55,7 @@ and the callback-order work is done for the multi-registrant lists.*
   `AscCAFilter::ResetOnGlue`, and raw slots 33 (`0x100D3700`, LFG-boss reset) / 39 (`0x101A1E50`,
   CA-gossip reset) have no recon registration (recorded original-only in the fixture — two small optional
   follow-ups). `native_callback_order.py`: 4329 checks, 0 failures (GlueScreen permutation run over the
-  pinned ranks).*
+  pinned ranks).
 
 ## Closed in this pipeline (each its own branch, ready for review)
 
