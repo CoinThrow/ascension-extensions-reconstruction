@@ -185,7 +185,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&Reset);
+        AscRuntime::OnGlueScreen(&Reset, 10);   // measured rank 10 (0x10110350)
         sDC.AddPacketHandler(0x636, CNetClientCustomPacket((void*)&OnDraftables, nullptr));
         sDC.AddPacketHandler(0x637, CNetClientCustomPacket((void*)&OnDraftable, nullptr));
         sDC.AddPacketHandler(0x638, CNetClientCustomPacket((void*)&OnDrafted, nullptr));

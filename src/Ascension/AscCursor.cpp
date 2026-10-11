@@ -184,8 +184,8 @@ namespace
         g_6162C0 = reinterpret_cast<Fn0_t>(AscRuntime::Detour(0x6162C0, 6, reinterpret_cast<void*>(&Hook6162C0)));
         g_616830 = reinterpret_cast<SetCursor_t>(AscRuntime::Detour(0x616830, 6, reinterpret_cast<void*>(&Hook616830)));
         g_683640 = reinterpret_cast<Fn683640_t>(AscRuntime::Detour(0x683640, 6, reinterpret_cast<void*>(&Hook683640)));
-        AscRuntime::OnGlueScreen(&LoadTable);
-        AscRuntime::OnGlueScreen(&ResetIndex);
+        AscRuntime::OnGlueScreen(&LoadTable, 31);    // measured rank 31 (0x10a20d00)
+        AscRuntime::OnGlueScreen(&ResetIndex, 32);   // measured rank 32 (0x10a20e10)
     }
 
     AscBindings::Module s_module(nullptr, 0, &Init);

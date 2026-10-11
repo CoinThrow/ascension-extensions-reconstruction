@@ -749,7 +749,7 @@ namespace
     void Init()
     {
         AscRuntime::OnAfter403340(&Tick);
-        AscRuntime::OnGlueScreen(&Reset);
+        AscRuntime::OnGlueScreen(&Reset, 36);   // measured rank 36 (0x101a83d0)
         // FUN_10114540 x2 (storage 0x10BDEF10 / 0x10BDEF14): no help, flags 1, "0", no callback, category 3.
         AscClientOptions::QueueWorldCVar({"extendedTooltips", "0", 1, 3, nullptr});
         AscClientOptions::QueueWorldCVar({"simplifiedTooltips", "0", 1, 3, nullptr});

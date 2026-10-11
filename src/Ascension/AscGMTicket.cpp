@@ -1768,8 +1768,8 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&ResetTickets);
-        AscRuntime::OnGlueScreen(&ResetCurrent);
+        AscRuntime::OnGlueScreen(&ResetTickets, 3);   // measured rank 3 (0x1024b460)
+        AscRuntime::OnGlueScreen(&ResetCurrent, 6);   // measured rank 6 (0x102552f0, the player-ticket manager)
         sDC.AddPacketHandler(0x701, CNetClientCustomPacket((void*)&OnPlayerTicketInfo, nullptr));
         sDC.AddPacketHandler(0x702, CNetClientCustomPacket((void*)&OnPlayerTicketUpdate, nullptr));
         sDC.AddPacketHandler(0x709, CNetClientCustomPacket((void*)&OnTicketList, nullptr));

@@ -1507,7 +1507,7 @@ namespace
 
     void InitPreview()   // FUN_1018b290
     {
-        AscRuntime::OnGlueScreen(ResetPreview);
+        AscRuntime::OnGlueScreen(ResetPreview, 26);   // measured rank 26 (0x1018af20)
         AscRuntime::OnAfter495810(WatchComponent, 0);   // measured rank 0
         AscRuntime::ReplaceFunction(0x4E0C10, reinterpret_cast<void*>(&SetCharacterCreateFacing));
         AscRuntime::ReplaceFunction(0x4E0BE0, reinterpret_cast<void*>(&GetCharacterCreateFacing));

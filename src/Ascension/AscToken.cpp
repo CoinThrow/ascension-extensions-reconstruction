@@ -155,7 +155,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&ResetAmounts);   // FUN_1033c260
+        AscRuntime::OnGlueScreen(&ResetAmounts, 30);   // FUN_1033c260; measured rank 30 (0x1033ee30)
         sDC.AddPacketHandler(0x66F, CNetClientCustomPacket((void*)&OnTokenList, nullptr));
         sDC.AddPacketHandler(0x670, CNetClientCustomPacket((void*)&OnTokenUpdate, nullptr));
     }

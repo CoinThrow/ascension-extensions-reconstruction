@@ -217,7 +217,7 @@ namespace
     void Init()
     {
         AscRuntime::OnEnterWorld(Start, 15);    // measured rank 15
-        AscRuntime::OnGlueScreen(Stop);
+        AscRuntime::OnGlueScreen(Stop, 42);     // measured rank 42 (0x10322470)
     }
 
     const AscBindings::Binding kBindings[] = {

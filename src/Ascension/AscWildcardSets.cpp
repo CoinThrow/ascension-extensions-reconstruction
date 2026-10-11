@@ -697,7 +697,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(OnGlueScreen);
+        AscRuntime::OnGlueScreen(OnGlueScreen, 21);   // measured rank 21 (0x10a36500)
         AscCA::OnEntryLearned(OnEntryLearned);
         AscCA::OnEntryUnlearned(OnEntryUnlearned);
     }

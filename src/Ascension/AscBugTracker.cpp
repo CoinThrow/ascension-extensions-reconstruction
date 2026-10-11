@@ -238,7 +238,7 @@ namespace
         sDC.AddPacketHandler(0x566, CNetClientCustomPacket((void*)&OnReportSuccess, nullptr));
         // FUN_100e71b0 (`mov ecx, report; jmp FUN_100e76f0`): the report is cleared on every glue screen
         // and at every world entry.
-        AscRuntime::OnGlueScreen(&Clear);
+        AscRuntime::OnGlueScreen(&Clear, 2);   // measured rank 2 (0x100e72c0)
         AscRuntime::OnEnterWorld(&Clear, 7);   // measured rank 7
     }
 

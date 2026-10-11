@@ -1147,7 +1147,7 @@ namespace
         sDC.AddPacketHandler(0x66B, CNetClientCustomPacket((void*)&OnPurchaseResult, nullptr));
         sDC.AddPacketHandler(0x6DE, CNetClientCustomPacket((void*)&OnBoosterResult, nullptr));
         sDC.AddPacketHandler(0x66C, CNetClientCustomPacket((void*)&OnCostPatch, nullptr));
-        AscRuntime::OnGlueScreen(OnGlueScreen);
+        AscRuntime::OnGlueScreen(OnGlueScreen, 24);   // measured rank 24 (0x1031aa00)
         AscGameMode::OnModeChanged(ResetContainers);
     }
 

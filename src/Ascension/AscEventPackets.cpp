@@ -487,7 +487,7 @@ namespace
         sDC.AddPacketHandler(0x68F, CNetClientCustomPacket((void*)&On68F, nullptr));
         sDC.AddPacketHandler(0x68E, CNetClientCustomPacket((void*)&On68E, nullptr));
         sDC.AddPacketHandler(0x668, CNetClientCustomPacket((void*)&On668, nullptr));
-        AscRuntime::OnGlueScreen(&Reset72D);
+        AscRuntime::OnGlueScreen(&Reset72D, 35);   // measured rank 35 (0x10193800, the 0x72d pair)
         sDC.AddPacketHandler(0x72D, CNetClientCustomPacket((void*)&On72D, nullptr));
         sDC.AddPacketHandler(0x742, CNetClientCustomPacket((void*)&On742, nullptr));
         sDC.AddPacketHandler(0x906, CNetClientCustomPacket((void*)&On906, nullptr));

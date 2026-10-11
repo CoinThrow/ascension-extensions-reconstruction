@@ -544,7 +544,7 @@ namespace
         sDC.AddPacketHandler(0x61E, CNetClientCustomPacket((void*)&OnUnlearnResult, nullptr));
         sDC.AddPacketHandler(0x644, CNetClientCustomPacket((void*)&OnRollResult, nullptr));
         sDC.AddPacketHandler(0x621, CNetClientCustomPacket((void*)&OnEntryLearned, nullptr));
-        AscRuntime::OnGlueScreen(OnGlueScreen);
+        AscRuntime::OnGlueScreen(OnGlueScreen, 17);   // measured rank 17 (0x10a32510)
         // 0x542030 begins push ebp / mov ebp,esp / sub esp,0x580: nine bytes.
         g_addSpell = reinterpret_cast<AddSpell_t>(AscRuntime::Detour(0x542030, 9, reinterpret_cast<void*>(&AddSpellDetour)));
         sDC.AddPacketHandler(0x6EE, CNetClientCustomPacket((void*)&OnMiscList, nullptr));

@@ -1272,7 +1272,7 @@ namespace
         Reset(g_editor);    // FUN_100fc070: BuildCreator +0x228
     }
 
-    void Init() { AscRuntime::OnGlueScreen(ResetOnGlue); }
+    void Init() { AscRuntime::OnGlueScreen(ResetOnGlue, 1); }   // measured rank 1 (glue list; 0x100fc170 + the CA store parts)
 
     const AscBindings::Binding kBindings[] = {
         {"C_CharacterAdvancement", "SetFilteredEntriesByCategory", SetFilteredEntriesByCategory},

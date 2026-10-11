@@ -2116,7 +2116,7 @@ namespace
         AscDbcPatch::Register(0x663, "DBFilesClient\\ChallengeModifiers.dbc", 0x20, 1ull << 4, AfterKeyed);
         AscDbcPatch::Register(0x664, "DBFilesClient\\ChallengeModifierTypes.dbc", 0x14, 0x1Eull, nullptr);
 
-        AscRuntime::OnGlueScreen(OnGlueScreen);
+        AscRuntime::OnGlueScreen(OnGlueScreen, 4);   // measured rank 4 (0x10135020)
         AscRuntime::OnAfterEnterWorld(OnEnteredWorld, 4);   // measured rank 4
         AscRuntime::OnAfter403340(Tick, 1);                 // measured rank 1
     }

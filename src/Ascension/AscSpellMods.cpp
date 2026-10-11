@@ -533,7 +533,7 @@ namespace
         AscRuntime::ReplaceFunction(0x7FD970, reinterpret_cast<void*>(&SpellModifierSum));
         g_8012F0 = reinterpret_cast<C2_t>(AscRuntime::Detour(0x8012F0, 9, reinterpret_cast<void*>(&Detour8012F0)));
         g_7FF100 = reinterpret_cast<C2_t>(AscRuntime::Detour(0x7FF100, 7, reinterpret_cast<void*>(&Detour7FF100)));
-        AscRuntime::OnGlueScreen(&ClearModifiers);
+        AscRuntime::OnGlueScreen(&ClearModifiers, 11);   // measured rank 11 (0x10327000)
         g_7FF180 = reinterpret_cast<C4_t>(AscRuntime::Detour(0x7FF180, 6, reinterpret_cast<void*>(&Detour7FF180)));
         g_802C30 = reinterpret_cast<C5_t>(AscRuntime::Detour(0x802C30, 9, reinterpret_cast<void*>(&Detour802C30)));
         g_71B820 = reinterpret_cast<This1_t>(AscRuntime::Detour(0x71B820, 6, reinterpret_cast<void*>(&Detour71B820)));

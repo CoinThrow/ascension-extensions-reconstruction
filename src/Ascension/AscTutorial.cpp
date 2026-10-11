@@ -1178,7 +1178,7 @@ namespace
         AscDbcPatch::Register(0x6A5, "DBFilesClient\\Tutorial.dbc", 0xB4, 0x1Full << 35, AfterTutorialPatch);
         AscDbcPatch::Register(0x6A7, "DBFilesClient\\TutorialObjectives.dbc", 0x20, 1ull << 7, AfterObjectivePatch);
         AscDbcPatch::Register(0x6AC, "DBFilesClient\\TutorialKeywords.dbc", 0x44, 0x1FCull, AfterKeywordPatch);
-        AscRuntime::OnGlueScreen(ResetAll);
+        AscRuntime::OnGlueScreen(ResetAll, 39);   // measured rank 39 (0x10a194e0)
         AscRuntime::OnAfterEnterWorld(SeedWatches, 8);   // measured rank 8
         AscRuntime::OnAfter403340(LevelWatch, 11);       // measured rank 11
         AscRuntime::OnStockEvent(0x258, RefreshCompleted);

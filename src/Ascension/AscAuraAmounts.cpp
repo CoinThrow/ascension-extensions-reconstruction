@@ -233,7 +233,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&ClearUnits);
+        AscRuntime::OnGlueScreen(&ClearUnits, 33);   // measured rank 33 (0x10a131f0)
         AscRuntime::OnObjectFree(&ForgetObject, 1);   // measured rank 1
         sDC.AddPacketHandler(0x673, CNetClientCustomPacket((void*)&OnAuraUpdateAddon, nullptr));
         sDC.AddPacketHandler(0x674, CNetClientCustomPacket((void*)&OnAuraUpdateAllAddon, nullptr));

@@ -119,9 +119,74 @@ what the lists *are*:
 | ObjectFree | AuraAmounts::ForgetObject, ObjectAddon::OnObjectFree (+1 runtime-registered first) | |
 | AfterTargetChange | Camera::AfterTargetChange, AddonTaint::AfterTargetChange | |
 
+## The GlueScreen list (measured 2026-10-11)
+
+`GlueScreen` (`0x10BE5868`, registrar `sub_1027A360`, 46 call sites — callback = the `push imm32`
+immediately before the `call`) was pinned from the donor_full1 walk at base `0x66950000`, and
+cross-checked against donor_full2 (`0x63E40000`). The raw ring slots 0..45 run:
+
+| slot | callback | recon registration | rank |
+| --- | --- | --- | --- |
+| 0 | `0x1016EA30` (CA store `&10BE1440` + filter reset) | `AscCAMgr::OnGlueScreen` / `AscCAFilter::ResetOnGlue` | 0 / 1 |
+| 1 | `0x100E72C0` | `AscBugTracker::Clear` | 2 |
+| 2 | `0x1024B460` | `AscGMTicket::ResetTickets` | 3 |
+| 3 | `0x10135020` | `AscChallenge::OnGlueScreen` | 4 |
+| 4 | `0x102592F0` | `AscJson::ResetBuildPayloads` | 5 |
+| 5 | `0x102552F0` | `AscGMTicket::ResetCurrent` | 6 |
+| 6 | `0x102DA8E0` | `AscPlayerPoll::Reset` | 7 |
+| 7 | `0x10336130` | `AscCAMgr::SuggestionsOnGlue` | 8 |
+| 8 | `0x102F6DD0` | `AscSkillCardSlots::OnGlueScreen` | 9 |
+| 9 | `0x10110350` | `AscBuildDraft::Reset` | 10 |
+| 10 | `0x10327000` | `AscSpellMods::ClearModifiers` | 11 |
+| 11 | `0x10296350` | `AscLootLockout::Reset` | 12 |
+| 12 | `0x1026ECD0` | `AscGroupFinder::Reset` | 13 |
+| 13 | `0x10119EF0` | `AscTrialCreator::OnGlueScreen` | 14 |
+| 14 | `0x100FC170` (creator/editor-zone reset) | merged into `AscCAFilter::ResetOnGlue` | 1 |
+| 15 | `0x102E5EE0` | `AscMysticEnchant::OnGlueScreen` | 15 |
+| 16 | `0x102F4E40` | `AscMysticEnchantPreset::Reset` | 16 |
+| 17 | `0x10A32510` (resets + cancels `WildcardReveal`) | `AscWildcardRolls::OnGlueScreen` / `AscWildcardRapid::OnGlueScreen` | 17 / 18 |
+| 18 | `0x10339CF0` | `AscTemporalContracts::OnGlue` | 19 |
+| 19 | `0x10226950` | `AscDraftMode::ResetState` | 20 |
+| 20 | `0x10A36500` | `AscWildcardSets::OnGlueScreen` | 21 |
+| 21 | `0x10238530` | `AscExtraActionButton::Stop` | 22 |
+| 22 | `0x10A3AC30` | `AscScrollOfFortune::Reset` | 23 |
+| 23 | `0x1031AA00` | `AscSkillCardCollection::OnGlueScreen` | 24 |
+| 24 | `0x101A1980` | `AscCAMgr::ClearCredits` | 25 |
+| 25 | `0x1018AF20` | `AscCharacterCreate::ResetPreview` | 26 |
+| 26 | `0x102A29B0` | `AscManastorm::OnGlueScreen` | 27 |
+| 27 | `0x100E1590` | `AscAssetQuery::Reset` | 28 |
+| 28 | `0x10194F90` | `AscMisc::ApplyCommandLine` | 29 |
+| 29 | `0x1033EE30` | `AscToken::ResetAmounts` | 30 |
+| 30 | `0x10A20D00` | `AscCursor::LoadTable` | 31 |
+| 31 | `0x10A20E10` | `AscCursor::ResetIndex` | 32 |
+| 32 | `0x10A131F0` | `AscAuraAmounts::ClearUnits` | 33 |
+| 33 | `0x100D3700` (zeroes the LFG-boss value) | **not reconstructed** (AscGlobalsB gap) | — |
+| 34 | `0x102DF7A0` | `AscRaidVideo::Restore` | 34 |
+| 35 | `0x10193800` | `AscEventPackets::Reset72D` | 35 |
+| 36 | `0x101A83D0` | `AscSpellText::Reset` | 36 |
+| 37 | `0x101A3CC0` | `AscCustomStore::OnGlueScreen` | 37 |
+| 38 | `0x100C2250` | `AscAppearance::OnGlueScreen` | 38 |
+| 39 | `0x101A1E50` (zeroes the CA-gossip word) | **not reconstructed** (gap) | — |
+| 40 | `0x10A194E0` | `AscTutorial::ResetAll` | 39 |
+| 41 | `0x102DCB00` | `AscGlobalsC::ResetPrestige` | 40 |
+| 42 | `0x10321500` | `AscGameMode::Reset` | 41 |
+| 43 | `0x10322470` | `AscSpellActivationOverlay::Stop` | 42 |
+| 44 | `0x10276C40` | `AscHighRisk::ResetFel` | 43 |
+| 45 | `0x102BDCA0` | `AscMythicPlus::ResetRun` | 44 |
+
+Notes:
+
+- The recon ranks are compact (0..44, monotonic in walk order). Two raw slots split into two recon
+  callbacks each (`0x1016EA30`, `0x10A32510`); raw slot 14 merges into `AscCAFilter::ResetOnGlue`
+  (one registration runs the CA-store, filter and creator-editor-zone resets); raw slots 33 and 39
+  have no recon registration and are listed original-only in the fixture. Raw multiset invariant: all
+  of 0..45 plus one extra 17.
+- These resets all run before the glue screen shows; reordering between them is not user-visible, but
+  the measured order is implemented exactly as captured.
+
 Implementation: `AscRuntime::InsertRanked` keeps `{rank, callback}` pairs; each registrar takes
 `uint32_t rank = 0xFFFFFFFF` and modules pass their callback's pinned rank at the registration site.
 Callbacks without a measured rank sort after the ranked entries, keeping registration order; the
 set's dedupe-by-pointer behaviour is reproduced. `native_callback_order.py` covers every registration
-permutation for representative lists plus dedupe, unknown placement and execution order (3849 checks,
-0 failures).
+permutation for representative lists plus dedupe, unknown placement and execution order (4329 checks,
+0 failures), including a GlueScreen permutation run over the pinned ranks.

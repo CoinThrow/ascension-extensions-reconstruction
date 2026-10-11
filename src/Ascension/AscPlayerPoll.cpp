@@ -377,7 +377,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&Reset);
+        AscRuntime::OnGlueScreen(&Reset, 7);   // measured rank 7 (0x102da8e0)
         AscRuntime::OnAfterEnterWorld(&RequestAfterEnterWorld, 5);   // measured rank 5
         sDC.AddPacketHandler(0x746, CNetClientCustomPacket((void*)&OnPollList, nullptr));
         sDC.AddPacketHandler(0x748, CNetClientCustomPacket((void*)&OnSubmitResult, nullptr));

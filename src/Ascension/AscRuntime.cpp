@@ -45,10 +45,10 @@ namespace
     }
 
     std::vector<std::pair<uint32_t, Callback>>& EnterWorldList() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
-    std::vector<Callback>& GlueScreenList() { static std::vector<Callback> v; return v; }
+    std::vector<std::pair<uint32_t, Callback>>& GlueScreenList() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
 
     void __cdecl RunEnterWorld() { RunRanked(EnterWorldList()); }
-    void __cdecl RunGlueScreen() { for (Callback cb : GlueScreenList()) cb(); }
+    void __cdecl RunGlueScreen() { RunRanked(GlueScreenList()); }
     std::vector<std::pair<uint32_t, Callback>>& AfterEnterWorldList() { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
     void __cdecl RunAfterEnterWorld() { RunRanked(AfterEnterWorldList()); }
 
@@ -780,7 +780,7 @@ const char* EventName(int eventId)
 }
 
 void OnEnterWorld(Callback cb, uint32_t rank) { InsertRanked(EnterWorldList(), cb, rank); }
-void OnGlueScreen(Callback cb) { GlueScreenList().push_back(cb); }
+void OnGlueScreen(Callback cb, uint32_t rank) { InsertRanked(GlueScreenList(), cb, rank); }
 void OnAfterEnterWorld(Callback cb, uint32_t rank) { InsertRanked(AfterEnterWorldList(), cb, rank); }
 void OnObjectFree(ObjectCallback cb, uint32_t rank) { InsertRanked(ObjectFreeList(), cb, rank); }
 void OnAlternate6DF050(Callback cb, uint32_t rank) { InsertRanked(Alternate6DF050List(), cb, rank); }

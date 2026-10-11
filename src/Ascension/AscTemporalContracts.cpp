@@ -652,7 +652,7 @@ namespace
 
     void Init()   // FUN_10339120
     {
-        AscRuntime::OnGlueScreen(OnGlue);
+        AscRuntime::OnGlueScreen(OnGlue, 19);   // measured rank 19 (0x10339cf0)
         AscRuntime::OnEnterWorld(OnEnterWorld, 6);   // measured rank 6
     }
 

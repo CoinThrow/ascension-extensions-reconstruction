@@ -876,7 +876,7 @@ namespace
         sDC.AddPacketHandler(0x5B1, CNetClientCustomPacket((void*)&OnActiveUpdate, nullptr));
         sDC.AddPacketHandler(0x5CA, CNetClientCustomPacket((void*)&OnCompletionList, nullptr));
         sDC.AddPacketHandler(0x5CB, CNetClientCustomPacket((void*)&OnCompletion, nullptr));
-        AscRuntime::OnGlueScreen(OnGlueScreen);
+        AscRuntime::OnGlueScreen(OnGlueScreen, 14);   // measured rank 14 (0x10119ef0)
     }
 
     const AscBindings::Binding kBindings[] = {

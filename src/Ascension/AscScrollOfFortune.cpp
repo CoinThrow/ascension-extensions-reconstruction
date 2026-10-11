@@ -440,7 +440,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&Reset);
+        AscRuntime::OnGlueScreen(&Reset, 23);   // measured rank 23 (0x10a3ac30)
         sDC.AddPacketHandler(0x6AB, CNetClientCustomPacket((void*)&OnRewardsList, nullptr));
         sDC.AddPacketHandler(0x6B6, CNetClientCustomPacket((void*)&OnClaimResult, nullptr));
         sDC.AddPacketHandler(0x6B8, CNetClientCustomPacket((void*)&OnClaimedList, nullptr));

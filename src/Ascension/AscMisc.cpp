@@ -453,7 +453,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&ApplyCommandLine);
+        AscRuntime::OnGlueScreen(&ApplyCommandLine, 29);   // measured rank 29 (0x10194f90)
         ApplyConfigFile();
         g_combatTextAt = reinterpret_cast<CombatTextAt_t>(AscRuntime::Detour(0x7E6DC0, 7, reinterpret_cast<void*>(&CombatTextAtDetour)));
         g_loadTile = reinterpret_cast<LoadTile_t>(AscRuntime::Detour(0x7D9A20, 9, reinterpret_cast<void*>(&LoadTileDetour)));

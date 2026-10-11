@@ -222,7 +222,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(Reset);
+        AscRuntime::OnGlueScreen(Reset, 41);   // measured rank 41 (0x10321500)
         sDC.AddPacketHandler(0x90B, CNetClientCustomPacket((void*)&OnGameModeChanged, nullptr));
         sDC.AddPacketHandler(0x5CC, CNetClientCustomPacket((void*)&OnSpecializationFlags, nullptr));
         sDC.AddPacketHandler(0x737, CNetClientCustomPacket((void*)&OnMysticEnchantLink, nullptr));

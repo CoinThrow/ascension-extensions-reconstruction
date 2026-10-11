@@ -2980,7 +2980,7 @@ namespace
         sDC.AddPacketHandler(0x619, CNetClientCustomPacket((void*)&OnProgress, nullptr));
         sDC.AddPacketHandler(0x734, CNetClientCustomPacket((void*)&OnPurchaseExtractResult, nullptr));
         AscRuntime::OnEnterWorld(&OnEnterWorld, 8);   // measured rank 8
-        AscRuntime::OnGlueScreen(&OnGlueScreen);
+        AscRuntime::OnGlueScreen(&OnGlueScreen, 15);  // measured rank 15 (0x102e5ee0)
         AscRuntime::OnAfter403340(&OnTick, 6);        // measured rank 6
         AscRuntime::OnGameObjectUse(&OnGameObjectUse);
     }

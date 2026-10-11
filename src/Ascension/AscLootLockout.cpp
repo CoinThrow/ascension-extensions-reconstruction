@@ -362,7 +362,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&Reset);
+        AscRuntime::OnGlueScreen(&Reset, 12);   // measured rank 12 (0x10296350)
         sDC.AddPacketHandler(0x9B4, CNetClientCustomPacket((void*)&OnAddLockouts, nullptr));
         sDC.AddPacketHandler(0x9B5, CNetClientCustomPacket((void*)&OnAddLockout, nullptr));
         sDC.AddPacketHandler(0x9B6, CNetClientCustomPacket((void*)&OnRemoveLockout, nullptr));

@@ -53,7 +53,9 @@ namespace AscRuntime
 
     typedef void (*Callback)();
     void OnEnterWorld(Callback cb, uint32_t rank = 0xFFFFFFFFu);     // FUN_10278510
-    void OnGlueScreen(Callback cb);     // FUN_10278760 (glue list: unmeasured)
+    // FUN_10278760 -> list 0x10be5868, run by the glue-screen dispatch (hook_4da9ac). Measured order:
+    // see tests/fixtures/original_callback_order.json, "GlueScreen".
+    void OnGlueScreen(Callback cb, uint32_t rank = 0xFFFFFFFFu);
     void OnAfterEnterWorld(Callback cb, uint32_t rank = 0xFFFFFFFFu); // FUN_10278780 -> list 0x10be29ac, after 0x528010 returns
 
     // FUN_10278530: callbacks run when the client dispatches stock event `eventId` (detour on the

@@ -171,7 +171,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&ResetPrestige);
+        AscRuntime::OnGlueScreen(&ResetPrestige, 40);   // measured rank 40 (0x102dcb00)
         sDC.AddPacketHandler(0x720, CNetClientCustomPacket((void*)&OnPrestige, nullptr));
     }
 

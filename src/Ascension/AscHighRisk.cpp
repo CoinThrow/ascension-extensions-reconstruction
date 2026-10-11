@@ -119,7 +119,7 @@ namespace
 
     void Init()
     {
-        AscRuntime::OnGlueScreen(&ResetFel);
+        AscRuntime::OnGlueScreen(&ResetFel, 43);   // measured rank 43 (0x10276c40)
         sDC.AddPacketHandler(0x73D, CNetClientCustomPacket((void*)&OnFelStatus, nullptr));
     }
 

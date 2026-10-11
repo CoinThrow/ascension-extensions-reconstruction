@@ -276,7 +276,7 @@ namespace
         sDC.AddPacketHandler(0x780, CNetClientCustomPacket((void*)&OnPayload<kLoadoutOwned>, nullptr));
         // FUN_102577d0 (-> FUN_10258190) on the glue-screen list; FUN_1025ac40 on the two Lua lists only
         // registers the natives.
-        AscRuntime::OnGlueScreen(&ResetBuildPayloads);
+        AscRuntime::OnGlueScreen(&ResetBuildPayloads, 5);   // measured rank 5 (0x102592f0)
     }
 
     const AscBindings::Binding kBindings[] = {

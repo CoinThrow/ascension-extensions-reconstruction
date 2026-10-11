@@ -63,6 +63,13 @@ order is the set's hash-bucket order of the runtime pointer values and permutes 
 the pinned ranks reproduce the reference base (0x67E30000), the base of the emulated and measured
 snapshots. See `docs/CALLBACK-ORDER-MEASURED.md` for the walks, the base-dependence and the per-list
 ranks.
+The GlueScreen list (`0x10BE5868`, registrar `sub_1027A360`, 46 call sites) is the twelfth measured
+list; its 45 registrations are pinned from the donor_full1 walk at base `0x66950000` (raw slots 0..45).
+Two originals split into two recon callbacks each (the CA-store/CAMgr reset and the wildcard
+rolls/rapid reset), raw slot 14 merges into `AscCAFilter::ResetOnGlue`, and raw slots 33 / 39 have no
+recon registration (they are recorded original-only in the fixture, with their sites). The fixture
+`tests/fixtures/original_callback_order.json` carries the per-registration `rank`, `raw_slot`,
+`function` and `site`.
 
 ## Building
 

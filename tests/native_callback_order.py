@@ -44,11 +44,14 @@ using Callback = void (*)();
 using ObjectCallback = void (*)(void*);
 std::vector<std::pair<uint32_t, Callback>>& EnterWorldList()
 { static std::vector<std::pair<uint32_t, Callback>> v; return v; }
+std::vector<std::pair<uint32_t, Callback>>& GlueScreenList()
+{ static std::vector<std::pair<uint32_t, Callback>> v; return v; }
 std::vector<std::pair<uint32_t, ObjectCallback>>& ObjectFreeList()
 { static std::vector<std::pair<uint32_t, ObjectCallback>> v; return v; }
 @RANKED_INSERT@
 @RANKED_RUN@
 @ENTER_REGISTER@
+@GLUE_REGISTER@
 @OBJECTFREE_REGISTER@
 std::vector<int> trace;
 int veto = -1;
@@ -81,6 +84,7 @@ template<int N> bool Hide(uint32_t kind, uint32_t guidLo, uint32_t guidHi, uint3
     return N == 1;
 }
 template<int N> void EnterCb() { trace.push_back(N); }
+template<int N> void GlueCb() { trace.push_back(N); }
 void EnterUnknown() { trace.push_back(7); }
 template<int N> void FreeCb(void*) { trace.push_back(N + 20); }
 int OriginalRemove(void*, void*, uint32_t, uint32_t) { trace.push_back(9); return 7; }
@@ -223,8 +227,38 @@ int main()
         OnObjectFree(&FreeCb<1>, freeRanks[1]);
         Check(ObjectFreeList().size() == 2);
     }
+    {
+        const uint32_t glueRanks[] = {@GLUE_RANKS@};
+        Callback glue[] = {&GlueCb<0>, &GlueCb<1>, &GlueCb<2>, &GlueCb<3>, &GlueCb<4>};
+        std::vector<int> captured;
+        for (int i = 0; i < 5; ++i) captured.push_back(i);
+        std::sort(captured.begin(), captured.end(),
+                  [&glueRanks](int a, int b) { return glueRanks[a] < glueRanks[b]; });
+        std::array<int, 5> glueOrder{0, 1, 2, 3, 4};
+        do
+        {
+            GlueScreenList().clear();
+            for (int i : glueOrder) OnGlueScreen(glue[i], glueRanks[i]);
+            std::vector<int> got;
+            for (auto& e : GlueScreenList())
+                for (int i = 0; i < 5; ++i)
+                    if (e.second == glue[i]) got.push_back(i);
+            Check(got == captured);
+            OnGlueScreen(&EnterUnknown, 0xFFFFFFFFu);
+            Check(GlueScreenList().size() == 6
+                  && GlueScreenList().back().second == &EnterUnknown);
+            OnGlueScreen(glue[0], glueRanks[0]);
+            Check(GlueScreenList().size() == 6);
+            trace.clear();
+            RunRanked(GlueScreenList());
+            std::vector<int> ran = captured;
+            ran.push_back(7);
+            Check(trace == ran);
+        } while (std::next_permutation(glueOrder.begin(), glueOrder.end()));
+    }
     std::cout << checks << " checks, " << failures << " failures: original callback order, vetoes, "
-              << "client fall-through, duplicate and unknown registration, measured-rank lists\n";
+              << "client fall-through, duplicate and unknown registration, measured-rank lists "
+              << "(EnterWorld and GlueScreen)\n";
     return failures ? 1 : 0;
 }
 '''
@@ -255,7 +289,17 @@ def check_captured_lists(fixture):
         assert len(sites) == len(set(sites)) and len(functions) == len(set(functions)), name
     original_only = [e for e in fixture['Before724820']['callbacks'] if not e.get('site')]
     assert len(original_only) == 1 and original_only[0]['function'] is None, 'original-only entry'
-    print('PASS: captured lists have distinct callback functions and sites', flush=True)
+    glue = fixture['GlueScreen']
+    glue_regs = [e for e in glue['callbacks'] if 'rank' in e]
+    assert [e['rank'] for e in glue_regs] == list(range(len(glue_regs))), 'glue ranks'
+    assert len({e['name'] for e in glue_regs}) == len(glue_regs), 'glue names'
+    glue_sites = [e['site'] for e in glue['callbacks'] if e.get('site')]
+    assert len(glue_sites) == len(set(glue_sites)), 'glue sites'
+    glue_raw = sorted(e['raw_slot'] for e in glue['callbacks'])
+    assert glue_raw == sorted(list(range(46)) + [17]), 'glue raw slots cover 0..45 plus the shared 17'
+    assert sum(1 for e in glue['callbacks'] if 'rank' not in e) == 2, 'glue original-only leaves'
+    print('PASS: captured lists have distinct callback functions and sites '
+          '(GlueScreen: 45 ranks + 2 original-only leaves)', flush=True)
 
 
 def main():
@@ -279,6 +323,7 @@ def main():
         ('RANKED_INSERT', '    template <class T>\n    void InsertRanked('),
         ('RANKED_RUN', '    template <class T>\n    void RunRanked('),
         ('ENTER_REGISTER', 'void OnEnterWorld(Callback'),
+        ('GLUE_REGISTER', 'void OnGlueScreen(Callback'),
         ('OBJECTFREE_REGISTER', 'void OnObjectFree(ObjectCallback'),
         ('REMOVE_DETOUR', 'int __fastcall Detour71E930('),
         ('CAST_DETOUR', 'int __cdecl Detour80B5D0('),
@@ -299,6 +344,11 @@ def main():
     free_ranks = [str(next(e for e in fixture['ObjectFree']['callbacks'] if e['name'] == s)['rank'])
                   for s in ('AscAuraAmounts::ForgetObject', 'AscObjectAddon::OnObjectFree')]
     harness = harness.replace('@FREE_RANKS@', ', '.join(free_ranks))
+    glue_slots = ('AscCAMgr::OnGlueScreen', 'AscCAFilter::ResetOnGlue', 'AscScrollOfFortune::Reset',
+                  'AscToken::ResetAmounts', 'AscMythicPlus::ResetRun')
+    glue_ranks = [str(next(e for e in fixture['GlueScreen']['callbacks'] if e['name'] == s)['rank'])
+                  for s in glue_slots]
+    harness = harness.replace('@GLUE_RANKS@', ', '.join(glue_ranks))
     compiler = shutil.which(os.environ.get('CXX', 'cl.exe' if os.name == 'nt' else 'c++'))
     if not compiler:
         raise SystemExit('A C++20 compiler is required.')

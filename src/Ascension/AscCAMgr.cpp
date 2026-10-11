@@ -5335,17 +5335,17 @@ namespace
         sDC.AddPacketHandler(0x729, CNetClientCustomPacket((void*)&OnUnlearnResult, nullptr));
         sDC.AddPacketHandler(0x72A, CNetClientCustomPacket((void*)&OnPurgeResult, nullptr));
         sDC.AddPacketHandler(0x926, CNetClientCustomPacket((void*)&OnCredit, nullptr));
-        AscRuntime::OnGlueScreen(&ClearCredits);   // FUN_101a1b70
+        AscRuntime::OnGlueScreen(&ClearCredits, 25);   // FUN_101a1b70; measured rank 25 (0x101a1980)
         sDC.AddPacketHandler(0x6CE, CNetClientCustomPacket((void*)&OnSpellSuggestion, nullptr));
         sDC.AddPacketHandler(0x6E2, CNetClientCustomPacket((void*)&OnInspectResult, nullptr));
         sDC.AddPacketHandler(0x6D2, CNetClientCustomPacket((void*)&OnStatSuggestion, nullptr));
         sDC.AddPacketHandler(0x64A, CNetClientCustomPacket((void*)&OnPatchEntry, nullptr));
         AscRuntime::OnEnterWorld(BuildIndex, 11);   // measured rank 11 (0x10172650 -> FUN_1014a530)
-        AscRuntime::OnGlueScreen(OnGlueScreen);
+        AscRuntime::OnGlueScreen(OnGlueScreen, 0);  // measured rank 0 (glue list; 0x1016ea30, the CA store)
         AscRuntime::OnAfter403340(Update);
         // The suggestion manager's registration (0x10333880): glue reset, the tick, and a dirty mark on
         // every CA list change. Its two wildcard-manager lists (0x10be2cac / 0x10be2ccc) land with C_Wildcard.
-        AscRuntime::OnGlueScreen(SuggestionsOnGlue);
+        AscRuntime::OnGlueScreen(SuggestionsOnGlue, 8);   // measured rank 8 (0x10336130)
         AscRuntime::OnAfter403340(SuggestionTick);
         for (std::vector<PairCallback>* list : {&g_onLearned, &g_onRankChanged, &g_onUnlearned, &g_onSpecChanged})
             list->push_back(SuggestionsDirty);

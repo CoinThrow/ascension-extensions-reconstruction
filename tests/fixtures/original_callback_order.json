@@ -5,7 +5,7 @@
   "hash": "FNV-1a over four little-endian relocated callback-pointer bytes",
   "bucket_mask": 7,
   "method": "Offline x86 startup emulation for Before71E930 / After80B5D0: follow head->next nodes to head, reading callback at node+8; closed list count verified. Before724820 / EffectFilter / VisualHide additionally measured from live list traversal in two independent game sessions of a sibling build; addresses translated with per-band deltas validated against both emulated lists.",
-  "limits": "Before71E930 and After80B5D0 are complete for this image. Before724820 carries one original-only callback (runtime-registered, no static call site; reconstructed 2026-10-10 as AscAccount::MentorAuraGate, called last) that runs after the five captured entries. The lifecycle lists EnterWorld, AfterEnterWorld, After403340, Alternate6DF050, LeaveWorld, Before528F00, After402910, After495810, After4F6F90, ObjectFree and AfterTargetChange were measured 2026-10-11 (live walks in four full-memory sessions; ranks in each section). Their iteration order is the set's hash-bucket order of the runtime pointer values and permutes with the load base, so the ranks pin the reference base 0x67E30000. Stock events, GameObjectUse and ItemUse have a single registrant each (order trivial); GlueScreen and the single-entry lists are order-irrelevant or unmeasured.",
+  "limits": "Before71E930 and After80B5D0 are complete for this image. Before724820 carries one original-only callback (runtime-registered, no static call site; reconstructed 2026-10-10 as AscAccount::MentorAuraGate, called last) that runs after the five captured entries. The lifecycle lists EnterWorld, AfterEnterWorld, After403340, Alternate6DF050, LeaveWorld, Before528F00, After402910, After495810, After4F6F90, ObjectFree and AfterTargetChange were measured 2026-10-11 (live walks in four full-memory sessions; ranks in each section). Their iteration order is the set's hash-bucket order of the runtime pointer values and permutes with the load base, so the ranks pin the reference base 0x67E30000. Stock events, GameObjectUse and ItemUse have a single registrant each (order trivial); GlueScreen was measured 2026-10-11 at donor_full1 base 0x66950000 (46-slot ring; see its section - ranks pinned by the recon, one merge and two original-only leaves); the single-entry lists are order-irrelevant.",
   "Before71E930": {
     "object": "0x10be2b8c",
     "callbacks": [
@@ -490,6 +490,342 @@
         "name": "AscAddonTaint::AfterTargetChange",
         "function": "0x10316980",
         "site": "0x10314d99"
+      }
+    ]
+  },
+  "GlueScreen": {
+    "object": "0x10BE5868",
+    "method": "Live walk of the original's MSVC unordered_set linked list (2026-10-11; donor_full1 at base 0x66950000, cross-checked against donor_full2 0x63e40000). Registrar sub_1027A360 -> list 0x10BE5868, 46 call sites (callback = the 'push imm32' immediately before the call). The ring's 46 slots are the raw walk order (raw_slot below). Ranks are the recon's pinned registration ranks: monotonic in walk order, compacted around the same-slot splits. Raw slot 17 (0x10a32510) backs two recon callbacks; raw slot 14 (0x100fc170) merges into AscCAFilter::ResetOnGlue; raw slots 33 (0x100d3700) and 39 (0x101a1e50) have no recon registration (listed original-only). Multiset invariant: raw slots 0..45 plus one extra 17.",
+    "callbacks": [
+      {
+        "rank": 0,
+        "name": "AscCAMgr::OnGlueScreen",
+        "function": "0x1016ea30",
+        "site": "0x10171ee0",
+        "raw_slot": 0
+      },
+      {
+        "rank": 1,
+        "name": "AscCAFilter::ResetOnGlue",
+        "function": "0x100fc170",
+        "site": "0x10101325",
+        "raw_slot": 14,
+        "note": "The recon registration merges the original's raw slot 14 (0x100fc170, creator/editor-zone reset) with the CA-store half of raw slot 0 (0x1016ea30, store at &10be1440); one recon callback runs both."
+      },
+      {
+        "rank": 2,
+        "name": "AscBugTracker::Clear",
+        "function": "0x100e72c0",
+        "site": "0x100e77df",
+        "raw_slot": 1
+      },
+      {
+        "rank": 3,
+        "name": "AscGMTicket::ResetTickets",
+        "function": "0x1024b460",
+        "site": "0x1024ea85",
+        "raw_slot": 2
+      },
+      {
+        "rank": 4,
+        "name": "AscChallenge::OnGlueScreen",
+        "function": "0x10135020",
+        "site": "0x1013b686",
+        "raw_slot": 3
+      },
+      {
+        "rank": 5,
+        "name": "AscJson::ResetBuildPayloads",
+        "function": "0x102592f0",
+        "site": "0x1025a6ae",
+        "raw_slot": 4
+      },
+      {
+        "rank": 6,
+        "name": "AscGMTicket::ResetCurrent",
+        "function": "0x102552f0",
+        "site": "0x10256cff",
+        "raw_slot": 5
+      },
+      {
+        "rank": 7,
+        "name": "AscPlayerPoll::Reset",
+        "function": "0x102da8e0",
+        "site": "0x102db153",
+        "raw_slot": 6
+      },
+      {
+        "rank": 8,
+        "name": "AscCAMgr::SuggestionsOnGlue",
+        "function": "0x10336130",
+        "site": "0x10336455",
+        "raw_slot": 7
+      },
+      {
+        "rank": 9,
+        "name": "AscSkillCardSlots::OnGlueScreen",
+        "function": "0x102f6dd0",
+        "site": "0x102f7d3a",
+        "raw_slot": 8
+      },
+      {
+        "rank": 10,
+        "name": "AscBuildDraft::Reset",
+        "function": "0x10110350",
+        "site": "0x10111425",
+        "raw_slot": 9
+      },
+      {
+        "rank": 11,
+        "name": "AscSpellMods::ClearModifiers",
+        "function": "0x10327000",
+        "site": "0x10327825",
+        "raw_slot": 10
+      },
+      {
+        "rank": 12,
+        "name": "AscLootLockout::Reset",
+        "function": "0x10296350",
+        "site": "0x10296ab7",
+        "raw_slot": 11
+      },
+      {
+        "rank": 13,
+        "name": "AscGroupFinder::Reset",
+        "function": "0x1026ecd0",
+        "site": "0x1027406d",
+        "raw_slot": 12
+      },
+      {
+        "rank": 14,
+        "name": "AscTrialCreator::OnGlueScreen",
+        "function": "0x10119ef0",
+        "site": "0x10124375",
+        "raw_slot": 13
+      },
+      {
+        "rank": 15,
+        "name": "AscMysticEnchant::OnGlueScreen",
+        "function": "0x102e5ee0",
+        "site": "0x102ec7ff",
+        "raw_slot": 15
+      },
+      {
+        "rank": 16,
+        "name": "AscMysticEnchantPreset::Reset",
+        "function": "0x102f4e40",
+        "site": "0x102f5c35",
+        "raw_slot": 16
+      },
+      {
+        "rank": 17,
+        "name": "AscWildcardRolls::OnGlueScreen",
+        "function": "0x10a32510",
+        "site": "0x10a34025",
+        "raw_slot": 17
+      },
+      {
+        "rank": 18,
+        "name": "AscWildcardRapid::OnGlueScreen",
+        "function": "0x10a32510",
+        "raw_slot": 17,
+        "note": "Same original as AscWildcardRolls::OnGlueScreen (one push at 0x10a34025); the recon splits the original's reset into two registrations that share raw slot 17."
+      },
+      {
+        "rank": 19,
+        "name": "AscTemporalContracts::OnGlue",
+        "function": "0x10339cf0",
+        "site": "0x1033bcff",
+        "raw_slot": 18
+      },
+      {
+        "rank": 20,
+        "name": "AscDraftMode::ResetState",
+        "function": "0x10226950",
+        "site": "0x10228fe5",
+        "raw_slot": 19
+      },
+      {
+        "rank": 21,
+        "name": "AscWildcardSets::OnGlueScreen",
+        "function": "0x10a36500",
+        "site": "0x10a37546",
+        "raw_slot": 20
+      },
+      {
+        "rank": 22,
+        "name": "AscExtraActionButton::Stop",
+        "function": "0x10238530",
+        "site": "0x102385a7",
+        "raw_slot": 21
+      },
+      {
+        "rank": 23,
+        "name": "AscScrollOfFortune::Reset",
+        "function": "0x10a3ac30",
+        "site": "0x10a3bac8",
+        "raw_slot": 22
+      },
+      {
+        "rank": 24,
+        "name": "AscSkillCardCollection::OnGlueScreen",
+        "function": "0x1031aa00",
+        "site": "0x1031e720",
+        "raw_slot": 23
+      },
+      {
+        "rank": 25,
+        "name": "AscCAMgr::ClearCredits",
+        "function": "0x101a1980",
+        "site": "0x101a1a75",
+        "raw_slot": 24
+      },
+      {
+        "rank": 26,
+        "name": "AscCharacterCreate::ResetPreview",
+        "function": "0x1018af20",
+        "site": "0x1018b0af",
+        "raw_slot": 25
+      },
+      {
+        "rank": 27,
+        "name": "AscManastorm::OnGlueScreen",
+        "function": "0x102a29b0",
+        "site": "0x102a6362",
+        "raw_slot": 26
+      },
+      {
+        "rank": 28,
+        "name": "AscAssetQuery::Reset",
+        "function": "0x100e1590",
+        "site": "0x100e168f",
+        "raw_slot": 27
+      },
+      {
+        "rank": 29,
+        "name": "AscMisc::ApplyCommandLine",
+        "function": "0x10194f90",
+        "site": "0x10195290",
+        "raw_slot": 28
+      },
+      {
+        "rank": 30,
+        "name": "AscToken::ResetAmounts",
+        "function": "0x1033ee30",
+        "site": "0x1033f9a5",
+        "raw_slot": 29
+      },
+      {
+        "rank": 31,
+        "name": "AscCursor::LoadTable",
+        "function": "0x10a20d00",
+        "site": "0x10a21715",
+        "raw_slot": 30
+      },
+      {
+        "rank": 32,
+        "name": "AscCursor::ResetIndex",
+        "function": "0x10a20e10",
+        "site": "0x10a21729",
+        "raw_slot": 31
+      },
+      {
+        "rank": 33,
+        "name": "AscAuraAmounts::ClearUnits",
+        "function": "0x10a131f0",
+        "site": "0x10a14d6a",
+        "raw_slot": 32
+      },
+      {
+        "rank": 34,
+        "name": "AscRaidVideo::Restore",
+        "function": "0x102df7a0",
+        "site": "0x102df57f",
+        "raw_slot": 34
+      },
+      {
+        "rank": 35,
+        "name": "AscEventPackets::Reset72D",
+        "function": "0x10193800",
+        "site": "0x10193845",
+        "raw_slot": 35
+      },
+      {
+        "rank": 36,
+        "name": "AscSpellText::Reset",
+        "function": "0x101a83d0",
+        "site": "0x101ac773",
+        "raw_slot": 36
+      },
+      {
+        "rank": 37,
+        "name": "AscCustomStore::OnGlueScreen",
+        "function": "0x101a3cc0",
+        "site": "0x101a576f",
+        "raw_slot": 37
+      },
+      {
+        "rank": 38,
+        "name": "AscAppearance::OnGlueScreen",
+        "function": "0x100c2250",
+        "site": "0x100c5c6b",
+        "raw_slot": 38
+      },
+      {
+        "rank": 39,
+        "name": "AscTutorial::ResetAll",
+        "function": "0x10a194e0",
+        "site": "0x10a1b7e5",
+        "raw_slot": 40
+      },
+      {
+        "rank": 40,
+        "name": "AscGlobalsC::ResetPrestige",
+        "function": "0x102dcb00",
+        "site": "0x102dcbdf",
+        "raw_slot": 41
+      },
+      {
+        "rank": 41,
+        "name": "AscGameMode::Reset",
+        "function": "0x10321500",
+        "site": "0x10321a95",
+        "raw_slot": 42
+      },
+      {
+        "rank": 42,
+        "name": "AscSpellActivationOverlay::Stop",
+        "function": "0x10322470",
+        "site": "0x103224e7",
+        "raw_slot": 43
+      },
+      {
+        "rank": 43,
+        "name": "AscHighRisk::ResetFel",
+        "function": "0x10276c40",
+        "site": "0x102770eb",
+        "raw_slot": 44
+      },
+      {
+        "rank": 44,
+        "name": "AscMythicPlus::ResetRun",
+        "function": "0x102bdca0",
+        "site": "0x102be1c9",
+        "raw_slot": 45
+      },
+      {
+        "name": "(original-only, not reconstructed)",
+        "function": "0x100d3700",
+        "site": "0x100d4cc3",
+        "raw_slot": 33,
+        "note": "Zeroes dword_10BDE640 - the value lua_global_GetLFGBoss reads. No recon registration (AscGlobalsB has no GlueScreen entry; gap documented 2026-10-11)."
+      },
+      {
+        "name": "(original-only, not reconstructed)",
+        "function": "0x101a1e50",
+        "site": "0x101a1e65",
+        "raw_slot": 39,
+        "note": "Zeroes dword_10BE1DA0 in the CA-gossip zone (companion of the gossip-condition sub_101A1DB0). No recon registration (gap documented 2026-10-11)."
       }
     ]
   }

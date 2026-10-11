@@ -723,7 +723,7 @@ namespace
         AscRuntime::OnEnterWorld(&ResetOnEnterWorld, 10);   // measured rank 10
         AscCA::OnSpecChanged(OnSpecChanged);
         sDC.AddPacketHandler(0x6F0, CNetClientCustomPacket((void*)&OnQuickRollConfigs, nullptr));
-        AscRuntime::OnGlueScreen(OnGlueScreen);
+        AscRuntime::OnGlueScreen(OnGlueScreen, 18);   // measured rank 18 (the same 0x10a32510 reset fires the session part)
     }
 
     const AscBindings::Binding kBindings[] = {
