@@ -24,8 +24,11 @@ packets and fires events.
 ## Deliberate differences from the genuine DLL
 
 - **Logon protocol.** The genuine DLL hooks `0x8CCE00`, `0x9A83E0` and `0x9A88C0` to replace SRP6 with
-  Ascension's own logon protocol. These are **not installed**, so the client authenticates with stock SRP6
-  against an ordinary AzerothCore authserver. See `src/Ascension/AscMain.cpp`.
+  Ascension's own logon protocol. **Not installed by default** -- the client authenticates with stock SRP6
+  against an AzerothCore authserver. A native reconstruction of the protocol (X25519 / ChaCha20 /
+  HMAC-SHA256, plus the four handshake length gates) now ships in `src/Ascension/AscNativeLogon.cpp`,
+  compiled in only when the build enables `-DASCENSION_NATIVE_LOGON=ON` (see below); it exists so the
+  client can be tested against a server that speaks the original protocol. See `src/Ascension/AscMain.cpp`.
 - **Character advancement initialization.** The native `0x726` known-entries handler synchronizes the
   build's unit parameters before notifying listeners and cloning its pending build. Waiting for the next
   manager tick leaves a new build at class and level zero during the first native update. This is an
@@ -67,6 +70,35 @@ cmake --build build
 The output is `build\Extensions.dll`. Place it next to `Ascension.exe`, which loads it itself (there is no
 injector).
 
+### Optional: native logon build (test against an Ascension-protocol server)
+
+```bat
+cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DASCENSION_NATIVE_LOGON=ON -S . -B build\nl
+cmake --build build\nl
+```
+
+This compiles in `src/Ascension/AscNativeLogon.cpp`: it installs the original DLL's three logon hooks
+(`0x8CCE00`, `0x9A83E0`, `0x9A88C0`) plus the four handshake length gates, replacing the client's stock SRP6
+with Ascension's own handshake (X25519 + ChaCha20 + HMAC-SHA256). It only works against a server that
+answers that protocol. The server's X25519 public key is a build setting,
+`-DASCENSION_NATIVE_LOGON_SERVER_KEY=<64 hex chars>` (default: the key live-tested during the 2026-10
+campaign; the server prints its key at startup). Run the client with `-extlog 1` and check
+`Logs\Extensions.log` for the `native-logon:` lines.
+
+Live-validated end to end on 2026-10-10 against a `feature/ascension-native-login` server
+(`CoA.AscensionAuth = 1`, matching key pair): the client logged `native-logon: proof check PASSED
+(HMAC-SHA256(key_derived, "OK"))`, the server answered `Ascension custom auth: proof replied, session
+authorised`, and the client went on through `COP_AUTHENTICATE ... AUTH_OK` to the character list
+(`COP_GET_CHARACTERS ... result=TRUE`). No client-side patches were involved: this build installs its own
+trampolines and length gates.
+
+One server requirement found during that test: after the custom proof the authserver must persist the
+handshake's 40-byte `key_session` as `account.session_key`. The worldserver validates the client's
+`CMSG_AUTH_SESSION` digest and initialises its header cipher from that value - without it every world
+connection fails its digest check immediately after the auth completes. The partner fork
+(`feature/ascension-native-login`) handles this in `AuthSession.cpp` (`HandleLogonProof`, Ascension
+client branch).
+
 The DLL's own developer log (`Logs\Extensions.log`) is off by default; start the client with `-extlog 1` to
 turn it on.
 
@@ -88,6 +120,9 @@ at "Authenticating" and then disconnects before character select.
 
 `CoA.Enable = 1` is also required. For clients that do not connect from loopback, set
 `CoA.AllowRemoteClients = 1` too, because both settings apply only to loopback otherwise.
+
+The authserver side of the custom handshake additionally requires the `key_session` persistence described
+in the native-logon section above (`AuthSession.cpp`, Ascension client branch).
 
 ## Client: required changes to `patch-B.MPQ`
 

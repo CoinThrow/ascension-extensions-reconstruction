@@ -53,7 +53,7 @@ who does want the original can go straight to it in the decompile.
 ## Deliberate differences from the genuine DLL
 
 - **Logon protocol.** The genuine DLL hooks `0x8CCE00`, `0x9A83E0` and `0x9A88C0` to replace SRP6 with Ascension's
-  own logon protocol. They are not installed, so the client authenticates with stock SRP6 against an AzerothCore
+  own logon protocol. They are not installed by default, so the client authenticates with stock SRP6 against an AzerothCore
   authserver (see `AscMain.cpp`, and `CLAUDE.md` G0-02).
 - **Anti-cheat.** It is loaded exactly as the original does (`DivxTac.dll` after world entry, plus the account
   kill switch). Nothing is added or removed.

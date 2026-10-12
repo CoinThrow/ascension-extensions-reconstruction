@@ -6,6 +6,7 @@
 #include <PatchConfig.hpp>
 #include <Main.hpp>
 #include <Ascension/AscLog.hpp>
+#include <Ascension/AscNativeLogon.hpp>
 #include <Ascension/AscRegistry.hpp>
 #include <Ascension/AscRuntime.hpp>
 #include <Ascension/AscBindings.hpp>
@@ -27,14 +28,17 @@ extern "C" __declspec(dllexport) int ClientExtensionsDummy() { return 1; }
 // makes): the upstream WotLK-Extensions feature patches WoWTime (+ the year-offset setting only it reads),
 // CMap, Misc, CGPlayer (char-create race fix, combo-point fix, LFD class roles), CGTooltip, CMissile,
 // MacroConditions, plus Spell / LuaUnlock (already no-ops here).
-// Deliberately NOT installed (the one remaining hook gap vs the original, 2026-09-27 live audit): the three
-// hooks of Ascension's own logon protocol --
+// Native logon is now reconstructed (src/Ascension/AscNativeLogon.cpp): the three hooks of Ascension's
+// own logon protocol --
 //   0x8CCE00 -> FUN_100e3dc0 (into the encrypted/VM region), 0x9A83E0 -> FUN_100e5d70 (copies the session key
 //   material into the client's auth object), 0x9A88C0 -> FUN_100e5dd0 (the 20-byte server proof,
-//   HMAC(K, "OK")).
-// Installing them replaces the client's native SRP6 with Ascension's logon, which our AzerothCore authserver
-// cannot answer until the translation proxy (BUILD_PLAN P3) exists. The JS client re-routes exactly these three
-// for the same reason. Project decision: SRP6-restore (CLAUDE.md G0-02).
+//   HMAC(K, "OK"))
+// -- plus the four exe length-gate patches, are installed behind the ASCENSION_NATIVE_LOGON build option
+// (default OFF). With it OFF this DLL keeps the original audit behaviour: the client's native SRP6 stays
+// in place, matching our AzerothCore authserver until the translation proxy (BUILD_PLAN P3) exists.
+// With it ON the client speaks Ascension's protocol (X25519 / ChaCha20 / HMAC-SHA256) and needs a server
+// that answers it (the collaborator's fork does). Project decision G0-02 (SRP6-restore) is unaffected:
+// the option defaults to OFF.
 static void ApplyUpstreamPatches()
 {
 #if CUSTOMPACKETS_PATCH
@@ -135,6 +139,12 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD reason, LPVOID)
         {
             ApplyUpstreamPatches();
             AscLog::Printf("upstream patches applied");
+#if ASCENSION_NATIVE_LOGON
+            // Ascension's own logon protocol, reconstructed natively (see AscNativeLogon.hpp).
+            // Switches the client from stock SRP6 to the original's X25519/ChaCha20/HMAC
+            // handshake; only meaningful against a server that speaks it.
+            AscNativeLogon::Install();
+#endif
             // The original DLL's module runtime: its custom event names, its world-entry / glue-screen
             // lifecycle hooks, then each transcribed subsystem's init (which registers into both).
             AscRuntime::RegisterEventNames();
