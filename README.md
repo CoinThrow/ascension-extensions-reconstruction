@@ -92,6 +92,9 @@ authorised`, and the client went on through `COP_AUTHENTICATE ... AUTH_OK` to th
 (`COP_GET_CHARACTERS ... result=TRUE`). No client-side patches were involved: this build installs its own
 trampolines and length gates.
 
+Key generation, the server branch and its `coa.conf` settings, and troubleshooting are in
+[`docs/NATIVE-LOGON.md`](docs/NATIVE-LOGON.md).
+
 One server requirement found during that test: after the custom proof the authserver must persist the
 handshake's 40-byte `key_session` as `account.session_key`. The worldserver validates the client's
 `CMSG_AUTH_SESSION` digest and initialises its header cipher from that value - without it every world
