@@ -3308,44 +3308,44 @@ The attach init's own client fixes -- hooks installed by FUN_10a66d40 (hook cens
 
 | Address | Kind | Line | Notes |
 |---|---|---|---|
-| `0x4181B0` | Detour | 1066 |  |
-| `0x424B50` | Detour | 1051 |  |
-| `0x4D5F70` | ReplaceFunction | 1035 |  |
-| `0x53D580` | Detour | 1062 |  |
-| `0x584600` | Detour | 1077 |  |
-| `0x58A550` | Detour | 1052 |  |
-| `0x58CA70` | Detour | 1053 |  |
-| `0x5940E0` | Detour | 1054 |  |
-| `0x598830` | Detour | 1058 |  |
-| `0x5AB120` | Detour | 1039 |  |
-| `0x620EE0` | Detour | 1055 |  |
-| `0x6904D0` | Detour | 1060 |  |
-| `0x6B0F90` | ReplaceFunction | 1036 |  |
-| `0x6B1080` | Detour | 1061 |  |
-| `0x6D23C0` | Detour | 1037 |  |
-| `0x6DC3F0` | Detour | 1075 |  |
-| `0x6E7B00` | Detour | 1038 |  |
-| `0x6F9260` | Detour | 1041 |  |
-| `0x70B960` | Detour | 1056 |  |
-| `0x70CDF0` | Detour | 1068 |  |
-| `0x718A00` | Detour | 1057 |  |
-| `0x71B7F0` | Detour | 1069 |  |
-| `0x720010` | Detour | 1074 |  |
-| `0x729C70` | Detour | 1072 |  |
-| `0x730050` | Detour | 1040 |  |
-| `0x743530` | Detour | 1071 |  |
-| `0x744A50` | Detour | 1048 |  |
-| `0x751F70` | Detour | 1073 |  |
-| `0x754D00` | Detour | 1063 |  |
-| `0x76A630` | Detour | 1059 |  |
-| `0x76DDE0` | ReplaceFunction | 1070 |  |
-| `0x7F3B60` | Detour | 1042 |  |
-| `0x805D70` | Detour | 1076 |  |
-| `0x806030` | Detour | 1043 |  |
-| `0x81B380` | Detour | 1064 |  |
-| `0x81F970` | Detour | 1049 |  |
-| `0x84E400` | Detour | 1067 |  |
-| `0x8A65E0` | Detour | 1065 |  |
+| `0x4181B0` | Detour | 1068 |  |
+| `0x424B50` | Detour | 1053 |  |
+| `0x4D5F70` | ReplaceFunction | 1037 |  |
+| `0x53D580` | Detour | 1064 |  |
+| `0x584600` | Detour | 1079 |  |
+| `0x58A550` | Detour | 1054 |  |
+| `0x58CA70` | Detour | 1055 |  |
+| `0x5940E0` | Detour | 1056 |  |
+| `0x598830` | Detour | 1060 |  |
+| `0x5AB120` | Detour | 1041 |  |
+| `0x620EE0` | Detour | 1057 |  |
+| `0x6904D0` | Detour | 1062 |  |
+| `0x6B0F90` | ReplaceFunction | 1038 |  |
+| `0x6B1080` | Detour | 1063 |  |
+| `0x6D23C0` | Detour | 1039 |  |
+| `0x6DC3F0` | Detour | 1077 |  |
+| `0x6E7B00` | Detour | 1040 |  |
+| `0x6F9260` | Detour | 1043 |  |
+| `0x70B960` | Detour | 1058 |  |
+| `0x70CDF0` | Detour | 1070 |  |
+| `0x718A00` | Detour | 1059 |  |
+| `0x71B7F0` | Detour | 1071 |  |
+| `0x720010` | Detour | 1076 |  |
+| `0x729C70` | Detour | 1074 |  |
+| `0x730050` | Detour | 1042 |  |
+| `0x743530` | Detour | 1073 |  |
+| `0x744A50` | Detour | 1050 |  |
+| `0x751F70` | Detour | 1075 |  |
+| `0x754D00` | Detour | 1065 |  |
+| `0x76A630` | Detour | 1061 |  |
+| `0x76DDE0` | ReplaceFunction | 1072 |  |
+| `0x7F3B60` | Detour | 1044 |  |
+| `0x805D70` | Detour | 1078 |  |
+| `0x806030` | Detour | 1045 |  |
+| `0x81B380` | Detour | 1066 |  |
+| `0x81F970` | Detour | 1051 |  |
+| `0x84E400` | Detour | 1069 |  |
+| `0x8A65E0` | Detour | 1067 |  |
 
 ### AscAttachLate
 
@@ -3596,11 +3596,11 @@ C_BuildCreator, transcribed from the original Extensions.dll. BuildCreatorEntryC
 
 | Binding | State | Args → returns | Original | Implementation | Notes |
 |---|---|---|---|---|---|
-| `C_BuildCreator.UpdateFilter` | world | (string, table, table) → 0 | `0x10107B80` | AscBuildCreator.cpp:2412 `UpdateFilter` |  |
-| `C_BuildCreator.ExportBuild` | world | (string) → 0..1 | `0x10103E40` | AscBuildCreator.cpp:2377 `ExportBuild` | C_BuildCreator.ExportBuild (FUN_10103e40): the link of a known build. |
-| `C_BuildEditor.ExportPendingBuild` | world | () → 1 | `0x10103F50` | AscBuildCreator.cpp:2390 `ExportPendingBuild` | C_BuildEditor.ExportPendingBuild (0x10103f50, no arguments): the pending entry's link. |
-| `C_BuildEditor.ImportBuild` | world | (string) → 0 | `0x10104D00` | AscBuildCreator.cpp:2395 `ImportBuild` |  |
-| `C_BuildEditor.ImportCurrentBuild` | world | () → 0 | `0x10104DC0` | AscBuildCreator.cpp:2406 `ImportCurrentBuild` | The active CA build (with the equipped mystic enchants) round-tripped through a link into the pending build. |
+| `C_BuildCreator.UpdateFilter` | world | (string, table, table) → 0 | `0x10107B80` | AscBuildCreator.cpp:2437 `UpdateFilter` |  |
+| `C_BuildCreator.ExportBuild` | world | (string) → 0..1 | `0x10103E40` | AscBuildCreator.cpp:2402 `ExportBuild` | C_BuildCreator.ExportBuild (FUN_10103e40): the link of a known build. |
+| `C_BuildEditor.ExportPendingBuild` | world | () → 1 | `0x10103F50` | AscBuildCreator.cpp:2415 `ExportPendingBuild` | C_BuildEditor.ExportPendingBuild (0x10103f50, no arguments): the pending entry's link. |
+| `C_BuildEditor.ImportBuild` | world | (string) → 0 | `0x10104D00` | AscBuildCreator.cpp:2420 `ImportBuild` |  |
+| `C_BuildEditor.ImportCurrentBuild` | world | () → 0 | `0x10104DC0` | AscBuildCreator.cpp:2431 `ImportCurrentBuild` | The active CA build (with the equipped mystic enchants) round-tripped through a link into the pending build. |
 | `C_BuildCreator.GetNumBuilds` | world | () → 1 | `0x101046D0` | AscBuildCreator.cpp:1550 `GetNumBuilds` | ---- getters ----------------------------------------------------------------------------------- +0x164 filtered |
 | `C_BuildCreator.GetBuildAtIndex` | world | (number) → 0..1 | `0x10104460` | AscBuildCreator.cpp:1555 `GetBuildAtIndex` |  |
 | `C_BuildCreator.GetBuild` | world | (string) → 0..1 | `0x10104340` | AscBuildCreator.cpp:1569 `GetBuild` |  |
@@ -6473,38 +6473,38 @@ C_RecoveryService, transcribed from the original's RecoveryServiceMgr (FUN_10305
 
 | Address | Kind | Line | Notes |
 |---|---|---|---|
-| `0x402910` | WriteJmp | 874 |  |
-| `0x402B20` | Detour | 819 |  |
-| `0x403340` | WriteJmp | 839 |  |
-| `0x4943C0` | WriteJmp | 879 |  |
-| `0x494490` | Detour | 820 |  |
-| `0x494530` | Detour | 821 |  |
-| `0x495810` | WriteJmp | 841 |  |
+| `0x402910` | WriteJmp | 892 |  |
+| `0x402B20` | Detour | 837 |  |
+| `0x403340` | WriteJmp | 857 |  |
+| `0x4943C0` | WriteJmp | 897 |  |
+| `0x494490` | Detour | 838 |  |
+| `0x494530` | Detour | 839 |  |
+| `0x495810` | WriteJmp | 859 |  |
 | `0x4DA9AC` | marker | 453 | (written through kGlueEpilogue) |
-| `0x4F6F90` | WriteJmp | 855 |  |
-| `0x5204C0` | WriteJmp | 853 |  |
-| `0x524BF0` | WriteJmp | 859 |  |
+| `0x4F6F90` | WriteJmp | 873 |  |
+| `0x5204C0` | WriteJmp | 871 |  |
+| `0x524BF0` | WriteJmp | 877 |  |
 | `0x528010` | marker | 426 | const uint32_t kEnterWorldPrologue = 6; |
-| `0x528C30` | WriteJmp | 871 |  |
-| `0x528F00` | WriteJmp | 873 |  |
-| `0x52A980` | WriteJmp | 857 |  |
-| `0x6DF050` | WriteJmp | 845 |  |
-| `0x6E7F50` | WriteJmp | 877 |  |
-| `0x6ECF80` | WriteJmp | 861 |  |
-| `0x6FC0F0` | WriteJmp | 843 |  |
-| `0x708C20` | WriteJmp | 849 |  |
-| `0x70F680` | WriteJmp | 847 |  |
-| `0x71E930` | WriteJmp | 865 |  |
-| `0x724820` | WriteJmp | 863 |  |
-| `0x727E70` | WriteJmp | 875 |  |
-| `0x730290` | WriteJmp | 881 |  |
-| `0x73F660` | Detour | 822 |  |
-| `0x743EC0` | WriteJmp | 851 |  |
-| `0x744AC0` | WriteJmp | 868 |  |
-| `0x80B5D0` | WriteJmp | 867 |  |
-| `0x80FEE0` | Detour | 823 |  |
-| `0x81AA00` | WriteJmp | 837 |  |
-| `0x81B5F0` | Detour | 824 |  |
+| `0x528C30` | WriteJmp | 889 |  |
+| `0x528F00` | WriteJmp | 891 |  |
+| `0x52A980` | WriteJmp | 875 |  |
+| `0x6DF050` | WriteJmp | 863 |  |
+| `0x6E7F50` | WriteJmp | 895 |  |
+| `0x6ECF80` | WriteJmp | 879 |  |
+| `0x6FC0F0` | WriteJmp | 861 |  |
+| `0x708C20` | WriteJmp | 867 |  |
+| `0x70F680` | WriteJmp | 865 |  |
+| `0x71E930` | WriteJmp | 883 |  |
+| `0x724820` | WriteJmp | 881 |  |
+| `0x727E70` | WriteJmp | 893 |  |
+| `0x730290` | WriteJmp | 899 |  |
+| `0x73F660` | Detour | 840 |  |
+| `0x743EC0` | WriteJmp | 869 |  |
+| `0x744AC0` | WriteJmp | 886 |  |
+| `0x80B5D0` | WriteJmp | 885 |  |
+| `0x80FEE0` | Detour | 841 |  |
+| `0x81AA00` | WriteJmp | 855 |  |
+| `0x81B5F0` | Detour | 842 |  |
 
 ### AscSceneTransform
 
@@ -6691,27 +6691,27 @@ Small namespaces with no shared state: C_Sun, C_CVar, C_Chat (infractions), C_Ta
 | `C_Taxi.GetCurrentTaxiNodeID` | world | () → 1 | `0x10217CE0` | AscSmallApis.cpp:152 `GetCurrentTaxiNodeID` | ---- C_Taxi (FUN_10217ce0 / d20 / d90) ---- Client taxi map: current node id 0xC0D7EC; node count 0xC0D7E4; 0x30-byte slots at 0xC0DC38 whose first dword is the TaxiNodes row. |
 | `C_Taxi.GetTaxiNodeID` | world | (number) → 1 | `0x10217D20` | AscSmallApis.cpp:157 `GetTaxiNodeID` |  |
 | `C_Taxi.GetTaxiPathDuration` | world | (number, number) → 0..1 | `0x10217D90` | AscSmallApis.cpp:172 `GetTaxiPathDuration` | TaxiTimes.dbc: +4 from slot, +8 to slot (0-based), +0xC duration. |
-| `C_LoyaltyPass.ClaimRewards` | world | () → 0 | `0x10296970` | AscSmallApis.cpp:501 `ClaimRewards` | sends `0x564` CMSG_LOYALTY_PASS_REDEEM |
-| `C_LoyaltyPass.GetTimeUntilNextReward` | world | () → 1 | `0x10296AE0` | AscSmallApis.cpp:508 `GetTimeUntilNextReward` |  |
-| `C_LoyaltyPass.GetTimeUntilExpiration` | world | () → 1 | `0x10296A60` | AscSmallApis.cpp:514 `GetTimeUntilExpiration` |  |
-| `C_LoyaltyPass.IsLoyaltyPassActive` | world | () → 1 | `0x10296B60` | AscSmallApis.cpp:520 `IsLoyaltyPassActive` |  |
-| `C_LoyaltyPass.IsLoyaltyPassExpired` | world | () → 1 | `0x10296BC0` | AscSmallApis.cpp:521 `IsLoyaltyPassExpired` |  |
-| `C_LoyaltyPass.CanRedeemLoyaltyPassReward` | world | () → 1 | `0x10296950` | AscSmallApis.cpp:522 `CanRedeemLoyaltyPassReward` |  |
-| `C_CharacterCustomizationUnlocks.GetCurrentOptionInfo` | both | (number) → 0..3 | `0x10330A60` | AscSmallApis.cpp:525 `GetCurrentOptionInfo` | ---- C_CharacterCustomizationUnlocks (handler_GetCurrentOptionInfo / ...): constant in the original ---- |
-| `C_CharacterCustomizationUnlocks.GetFirstLockedRequirement` | both | () → 1 | `0x10330B20` | AscSmallApis.cpp:535 `GetFirstLockedRequirement` |  |
-| `C_CharacterCustomizationUnlocks.HasLockedSelections` | both | () → 1 | `0x10330ED0` | AscSmallApis.cpp:536 `HasLockedSelections` |  |
-| `C_Scenario.GetActiveStage` | world | () → 2 | `0x103073E0` | AscSmallApis.cpp:481 `GetActiveStage` | ---- C_Scenario (FUN_103073e0 .. handler_IsInScenario): constant in the original ---- |
-| `C_Scenario.GetEncounterAtIndex` | world | () → 1 | `0x10307410` | AscSmallApis.cpp:482 `GetEncounterAtIndex` |  |
-| `C_Scenario.GetNumEncounters` | world | () → 1 | `0x10307440` | AscSmallApis.cpp:483 `GetNumEncounters` |  |
-| `C_Scenario.GetScenarioName` | world | () → 1 | `0x10307460` | AscSmallApis.cpp:484 `GetScenarioName` |  |
-| `C_Scenario.IsInScenario` | world | () → 1 | `0x10307480` | AscSmallApis.cpp:485 `IsInScenario` |  |
+| `C_LoyaltyPass.ClaimRewards` | world | () → 0 | `0x10296970` | AscSmallApis.cpp:502 `ClaimRewards` | sends `0x564` CMSG_LOYALTY_PASS_REDEEM |
+| `C_LoyaltyPass.GetTimeUntilNextReward` | world | () → 1 | `0x10296AE0` | AscSmallApis.cpp:509 `GetTimeUntilNextReward` |  |
+| `C_LoyaltyPass.GetTimeUntilExpiration` | world | () → 1 | `0x10296A60` | AscSmallApis.cpp:515 `GetTimeUntilExpiration` |  |
+| `C_LoyaltyPass.IsLoyaltyPassActive` | world | () → 1 | `0x10296B60` | AscSmallApis.cpp:521 `IsLoyaltyPassActive` |  |
+| `C_LoyaltyPass.IsLoyaltyPassExpired` | world | () → 1 | `0x10296BC0` | AscSmallApis.cpp:522 `IsLoyaltyPassExpired` |  |
+| `C_LoyaltyPass.CanRedeemLoyaltyPassReward` | world | () → 1 | `0x10296950` | AscSmallApis.cpp:523 `CanRedeemLoyaltyPassReward` |  |
+| `C_CharacterCustomizationUnlocks.GetCurrentOptionInfo` | both | (number) → 0..3 | `0x10330A60` | AscSmallApis.cpp:526 `GetCurrentOptionInfo` | ---- C_CharacterCustomizationUnlocks (handler_GetCurrentOptionInfo / ...): constant in the original ---- |
+| `C_CharacterCustomizationUnlocks.GetFirstLockedRequirement` | both | () → 1 | `0x10330B20` | AscSmallApis.cpp:536 `GetFirstLockedRequirement` |  |
+| `C_CharacterCustomizationUnlocks.HasLockedSelections` | both | () → 1 | `0x10330ED0` | AscSmallApis.cpp:537 `HasLockedSelections` |  |
+| `C_Scenario.GetActiveStage` | world | () → 2 | `0x103073E0` | AscSmallApis.cpp:482 `GetActiveStage` | ---- C_Scenario (FUN_103073e0 .. handler_IsInScenario): constant in the original ---- |
+| `C_Scenario.GetEncounterAtIndex` | world | () → 1 | `0x10307410` | AscSmallApis.cpp:483 `GetEncounterAtIndex` |  |
+| `C_Scenario.GetNumEncounters` | world | () → 1 | `0x10307440` | AscSmallApis.cpp:484 `GetNumEncounters` |  |
+| `C_Scenario.GetScenarioName` | world | () → 1 | `0x10307460` | AscSmallApis.cpp:485 `GetScenarioName` |  |
+| `C_Scenario.IsInScenario` | world | () → 1 | `0x10307480` | AscSmallApis.cpp:486 `IsInScenario` |  |
 | `C_Item.CanBind` | world | (string) → 0..1 | `0x100C71C0` | AscSmallApis.cpp:202 `CanBind` |  |
 | `C_Item.IsBound` | world | (string) → 0..1 | `0x100CAC80` | AscSmallApis.cpp:222 `IsBound` |  |
 | `C_Item.GetScalingLevel` | world | (string) → 0..1 | `0x100CA700` | AscSmallApis.cpp:237 `GetScalingLevel` | FUN_100ca700: the item's addon field 0 (FUN_1027f1f0 -> FUN_102cdbb0). |
 | `C_QuestLog.GetQuestType` | world | (number) → 1 | `0x1021AE60` | AscSmallApis.cpp:255 `GetQuestType` | ---- C_QuestLog ---- FUN_1021ae60: QuestCache (0xC5DA48, 0x67DE90) record +0x50 flags: 0x400000 -> 2, 0x800000 -> 4, else 1. |
-| `C_QuestLog.GetUnitQuestInfo` | world | () → 1..3 | `0x1021AC30` | AscSmallApis.cpp:392 `GetUnitQuestInfo` | FUN_1021ac30: (unit token). A unit with a quest-giver state (+0x90): its name ("unavailable" 1, "trivial" 2, "incomplete" 5, "handin" 6/9/10, "pickup" 8, else ""), -1, and the string at (+0x8C)->+0x2C +0x3C. Otherwise its creature record's +0x6C entry against the quest log: "objective" or "collect" and the quest id. Else nil. |
-| `C_QuestLog.GetZoneStoryInfo` | world | (number) → 2 | `0x1021AF00` | AscSmallApis.cpp:450 `GetZoneStoryInfo` | FUN_1021af00: the player's race (UNIT_FIELD_BYTES_0 byte 0) -> ChrRaces (client 0xAD3428) +0x1C: 1 -> 3, 7 -> 2, else 0. First ZoneStory row (min <= id < max -- the max id is never visited) with +0xC == zone and +4 in {0, that value}: +8, +0x10. |
-| `C_EquipmentSet.PlaceInBank` | both | (number) → 0 | `0x10228520` | AscSmallApis.cpp:546 `PlaceInBank` | C_EquipmentSet.PlaceInBank(index) (0x10228520): luaL_checknumber; below 20, CMSG 0x55E with index - 1 (index 0 wraps). Returns nothing. — sends `0x55E` CMSG_EQUIPMENTSET_ITEM_PLACE_IN_BANK |
+| `C_QuestLog.GetUnitQuestInfo` | world | () → 1..3 | `0x1021AC30` | AscSmallApis.cpp:393 `GetUnitQuestInfo` | FUN_1021ac30: (unit token). A unit with a quest-giver state (+0x90): its name ("unavailable" 1, "trivial" 2, "incomplete" 5, "handin" 6/9/10, "pickup" 8, else ""), -1, and the string at (+0x8C)->+0x2C +0x3C. Otherwise its creature record's +0x6C entry against the quest log: "objective" or "collect" and the quest id. Else nil. |
+| `C_QuestLog.GetZoneStoryInfo` | world | (number) → 2 | `0x1021AF00` | AscSmallApis.cpp:451 `GetZoneStoryInfo` | FUN_1021af00: the player's race (UNIT_FIELD_BYTES_0 byte 0) -> ChrRaces (client 0xAD3428) +0x1C: 1 -> 3, 7 -> 2, else 0. First ZoneStory row (min <= id < max -- the max id is never visited) with +0xC == zone and +4 in {0, that value}: +8, +0x10. |
+| `C_EquipmentSet.PlaceInBank` | both | (number) → 0 | `0x10228520` | AscSmallApis.cpp:547 `PlaceInBank` | C_EquipmentSet.PlaceInBank(index) (0x10228520): luaL_checknumber; below 20, CMSG 0x55E with index - 1 (index 0 wraps). Returns nothing. — sends `0x55E` CMSG_EQUIPMENTSET_ITEM_PLACE_IN_BANK |
 
 **Server packets handled**
 

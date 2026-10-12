@@ -78,3 +78,22 @@ flag is `0x8000` (developer), and the tag pairs additionally never apply to your
 - `tests/native_callback_order.py` locks the orders in: the registrars run under all registration
   permutations, with vetoes, duplicate registrations, an off-array ("unknown") site, and — for visual
   hiding — the production consumer's first-true-wins short-circuit.
+
+## Limit: the three orders depend on where the DLL loads
+
+The original keeps each list in an MSVC `unordered_set` keyed on the callback pointers (FNV-1a over the
+relocated pointer, bucket mask 7), and its image is built with ASLR (`DllCharacteristics 0x140`). Which
+callbacks share a bucket therefore depends on the load address. For `Before71E930` and `After80B5D0`
+that sharing is the same at all 65,536 allocation-aligned bases (`check_relocation_buckets`). For the
+three lists here it is not:
+
+| list | bucket-sharing patterns across the 65,536 bases |
+|---|---|
+| `Before724820` | 10 |
+| `EffectFilter` | 2 (shared bucket at 2,112 bases) |
+| `VisualHide` | 2 (shared bucket at 2,112 bases) |
+
+So the captured order is one sample: correct for the load address it was measured at, and possibly
+different at others. Deriving the original's registration execution order and computing the order from
+the bucket hash, as for the two emulated lists, would remove the dependence. Order only matters when an
+earlier callback vetoes and a later one has side effects.
